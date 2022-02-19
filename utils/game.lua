@@ -27,7 +27,7 @@ function Game.new()
     local game = {}
     game.player = Player.new()
     game.width, game.height = love.graphics.getWidth(), love.graphics.getHeight()
-    game.scaleX, game.scaleY = Screen_size[1]/800, Screen_size[2]/600
+    game.scaleX, game.scaleY = Screen_size[1] / 800, Screen_size[2] / 600
     game.player.size = game.scaleX * game.player.size
     love.window.setMode(Screen_size[1], Screen_size[2])
     game.drawable_objects = { game.player }
@@ -138,7 +138,15 @@ function Game:shoot()
         love.graphics.line(mouse_pos_x, self.player.y, mouse_pos_x, mouse_pos_y)
         local angle = math.atan(opposite / adjacent)
         love.graphics.print("angle " .. tostring(angle), 0, 40)
-
+        local extend_distance = 200
+        -- sin(theta) = opposite / extend_distance
+        -- sin(theta)
+        if not (mouse_pos_y > self.player.y) then
+            extend_x, extend_y = math.sin(angle + 180) * extend_distance, math.cos(angle + 180) * extend_distance
+        else
+            extend_x, extend_y = (math.sin(angle) * extend_distance), (math.cos(angle) * extend_distance)
+        end
+        love.graphics.line(mouse_pos_x, mouse_pos_y, mouse_pos_x + extend_x, mouse_pos_y + extend_y)
         return love.graphics.line(self.player.x, self.player.y, mouse_pos_x, mouse_pos_y)
     end
     love.graphics.setColor(1, 1, 1, 1)
