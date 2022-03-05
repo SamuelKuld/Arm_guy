@@ -1,1 +1,0 @@
-love.graphics.print("SPeedy")
