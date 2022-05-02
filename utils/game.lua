@@ -27,7 +27,7 @@ function Game.new()
     local game = {}
     game.player = Player.new()
     game.width, game.height = love.graphics.getWidth(), love.graphics.getHeight()
-    game.scaleX, game.scaleY = Screen_size[1]/800, Screen_size[2]/600
+    game.scaleX, game.scaleY = Screen_size[1] / 800, Screen_size[2] / 600
     game.player.size = game.scaleX * game.player.size
     love.window.setMode(Screen_size[1], Screen_size[2])
     game.drawable_objects = { game.player }
@@ -95,14 +95,6 @@ function Inverse_keys_pressed()
     end
 
     return inverse_keys_pressed
-end
-
-function Game:neither_velocities_too_slow()
-    if (self.player.velocity.x < .001 and self.player.velocity.x > -.001) or
-        (self.player.velocity.y < .001 and self.player.velocity.y > -.001) then
-        return false
-    end
-    return true
 end
 
 function Game:handle_collision()
