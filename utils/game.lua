@@ -2,35 +2,60 @@ require("utils/settings")
 
 Bullet = {}
 Bullet.__index = Bullet
-function Bullet.new(x, y, angle, speed, damage, owner)
+function Bullet.new(x, y, angle, owner)
     local self = setmetatable({}, Bullet)
     self.x_start = x
     self.y_start = y
-    self.x_end = x + math.cos(angle) * 5
-    self.y_end = y + math.sin(angle) * 5
-    self.angle = angle
-    self.speed = speed
-    self.damage = damage
+    self.x_end = x + math.cos(angle) * Bullet_size
+    self.y_end = y + math.sin(angle) * Bullet_size
+    self.angle = angle + (math.random(-Bullet_spread, Bullet_spread) * .01)
+    self.speed = Bullet_speed
+    self.damage = Bullet_damage
+    self.Bullet_lifetime = math.random(-Bullet_lifetime, Bullet_lifetime * 10) * .01
     self.owner = owner
+    self.Bullet_life = 0
     self.dead = false
+    self.right = true
     return self
 end
 
 function Bullet:draw()
-    love.graphics.setColor(255, 0, 0)
+    if self.dead then
+        love.graphics.draw(love.graphics.circle("fill", self.x_end, self.y_end, Bullet_size))
+    end
+    love.graphics.setColor({ math.random(0, 100) * .01, math.random(0, 100) * .01, math.random(0, 100) * .01, 1 })
     love.graphics.line(self.x_start, self.y_start, self.x_end, self.y_end)
 end
 
 function Bullet:update(dt)
-    self.x_start = self.x_start + math.cos(self.angle) * self.speed * dt
-    self.y_start = self.y_start + math.sin(self.angle) * self.speed * dt
-    self.x_end = self.x_end + math.cos(self.angle) * self.speed * dt
-    self.y_end = self.y_end + math.sin(self.angle) * self.speed * dt
-    if self.x_end < 0 or self.x_end > Screen_size[1] or self.y_end < 0 or self.y_end > Screen_size[2] then
-        self.dead = true
+    self.Bullet_life = self.Bullet_life + dt
+    if self.right then
+        self.x_start = self.x_start + (math.cos(self.angle) * self.speed * dt) + Oscilation_size
+        self.y_start = self.y_start + (math.sin(self.angle) * self.speed * dt) + Oscilation_size
+        self.x_end = self.x_end + (math.cos(self.angle) * self.speed * dt) + Oscilation_size
+        self.y_end = self.y_end + (math.sin(self.angle) * self.speed * dt) + Oscilation_size
+        if math.random(0, 1) == 1 then
+            self.right = false
+        end
+    else
+        self.x_start = self.x_start + (math.cos(self.angle) * self.speed * dt) - Oscilation_size
+        self.y_start = self.y_start + (math.sin(self.angle) * self.speed * dt) - Oscilation_size
+        self.x_end = self.x_end + (math.cos(self.angle) * self.speed * dt) - Oscilation_size
+        self.y_end = self.y_end + (math.sin(self.angle) * self.speed * dt) - Oscilation_size
+        if math.random(0, 1) == 1 then
+            self.right = true
+        end
     end
-    if self.dead == true then
-        self = nil
+    self.x_start = self.x_start + Wave_size
+    self.x_end = self.x_end + Wave_size
+    if self.y_end < 0 or self.y_end > Screen_size[2] then
+        self.angle = math.asin(self.angle)
+    end
+    if self.x_end < 0 or self.x_end > 1920 then
+        self.angle = math.atan(self.angle)
+    end
+    if self.Bullet_life > self.Bullet_lifetime then
+        self.dead = true
     end
 end
 
@@ -154,20 +179,21 @@ end
 
 function Game:shoot()
     love.graphics.setColor(1, 0, 0, 1)
-    if love.mouse.isDown("1") and self.shoot_timer1 > .1 then
+    if love.mouse.isDown("1") and self.shoot_timer1 > Bullet_delay then
         local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
         love.graphics.print("mouse_x " .. tostring(mouse_pos_x))
         love.graphics.print("mouse_y " .. tostring(mouse_pos_y), 0, 10)
         love.graphics.print("player_x " .. tostring(self.player.x), 0, 20)
         love.graphics.print("player_y " .. tostring(self.player.y), 0, 30)
-
-        table.insert(self.bullets,
-            Bullet.new(self.player.x,
-                self.player.y,
-                math.atan2(mouse_pos_y - self.player.y,
-                    mouse_pos_x - self.player.x),
-                500, 500, self.player))
-        self.shoot_timer1 = 0
+        for i = 0, Bullet_amount do
+            table.insert(self.bullets,
+                Bullet.new(self.player.x,
+                    self.player.y,
+                    math.atan2(mouse_pos_y - self.player.y,
+                        mouse_pos_x - self.player.x),
+                    500))
+            self.shoot_timer1 = 0
+        end
     end
     love.graphics.setColor(1, 1, 1, 1)
 end
@@ -184,9 +210,14 @@ function Game:update(dt)
         self.player.velocity.x = self.player.velocity.x / 1.1
         self.player.velocity.y = self.player.velocity.y / 1.1
     end
-
+    if math.random(0, 1) == 1 then
+        Wave_size = -Wave_size
+    end
     for i, bullet in ipairs(self.bullets) do
         bullet:update(dt)
+        if bullet.dead then
+            table.remove(self.bullets, i)
+        end
     end
 end
 
