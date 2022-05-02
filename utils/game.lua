@@ -23,7 +23,7 @@ function Bullet:draw()
     if self.dead then
         love.graphics.draw(love.graphics.circle("fill", self.x_end, self.y_end, Bullet_size))
     end
-    love.graphics.setColor({ math.random(0, 100) * .01, math.random(0, 100) * .01, math.random(0, 100) * .01, 1 })
+    love.graphics.setColor(Bullet_color)
     love.graphics.line(self.x_start, self.y_start, self.x_end, self.y_end)
 end
 
@@ -49,10 +49,13 @@ function Bullet:update(dt)
     self.x_start = self.x_start + Wave_size
     self.x_end = self.x_end + Wave_size
     if self.y_end < 0 or self.y_end > Screen_size[2] then
-        self.angle = math.asin(self.angle)
+        self.angle = -(self.angle)
     end
-    if self.x_end < 0 or self.x_end > 1920 then
+    if self.x_end < 0 then
         self.angle = math.atan(self.angle)
+    end
+    if self.x_end > Screen_size[1] then
+        self.angle = math.acos(self.angle)
     end
     if self.Bullet_life > self.Bullet_lifetime then
         self.dead = true
