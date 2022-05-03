@@ -20,9 +20,7 @@ function Bullet.new(x, y, angle, owner)
 end
 
 function Bullet:draw()
-    if self.dead then
-        love.graphics.draw(love.graphics.circle("fill", self.x_end, self.y_end, Bullet_size))
-    end
+    -- love.graphics.print("Angle " .. self.angle, self.x_start, self.y_start)
     love.graphics.setColor(Bullet_color)
     love.graphics.line(self.x_start, self.y_start, self.x_end, self.y_end)
 end
@@ -48,14 +46,29 @@ function Bullet:update(dt)
     end
     self.x_start = self.x_start + Wave_size
     self.x_end = self.x_end + Wave_size
-    if self.y_end < 0 or self.y_end > Screen_size[2] then
+    if self.y_end >= Screen_size[2] then
+        self.y_start = Screen_size[2] - 1
+        self.y_end = Screen_size[2] - 1
         self.angle = -(self.angle)
     end
-    if self.x_end < 0 then
-        self.angle = math.atan(self.angle)
+    if self.y_end <= 0 then
+        self.y_start = 1
+        self.y_end = 1
+        self.angle = -(self.angle)
+    end
+    if self.x_end <= 0 and not (self.angle > 0) then
+        self.x_end = 1
+        self.x_start = 1
+        self.angle = self.angle + math.pi / 2
+    elseif self.x_end <= 0 and self.angle > 0 then
+        self.x_end = 1
+        self.x_start = 1
+        self.angle = self.angle - math.pi / 2
     end
     if self.x_end > Screen_size[1] then
-        self.angle = math.acos(self.angle)
+        self.x_end = Screen_size[1] - 1
+        self.x_start = Screen_size[1] - 1
+        self.angle = self.angle - math.pi / 2
     end
     if self.Bullet_life > self.Bullet_lifetime then
         self.dead = true
@@ -184,10 +197,6 @@ function Game:shoot()
     love.graphics.setColor(1, 0, 0, 1)
     if love.mouse.isDown("1") and self.shoot_timer1 > Bullet_delay then
         local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
-        love.graphics.print("mouse_x " .. tostring(mouse_pos_x))
-        love.graphics.print("mouse_y " .. tostring(mouse_pos_y), 0, 10)
-        love.graphics.print("player_x " .. tostring(self.player.x), 0, 20)
-        love.graphics.print("player_y " .. tostring(self.player.y), 0, 30)
         for i = 0, Bullet_amount do
             table.insert(self.bullets,
                 Bullet.new(self.player.x,
@@ -216,6 +225,7 @@ function Game:update(dt)
     if math.random(0, 1) == 1 then
         Wave_size = -Wave_size
     end
+    self:shoot()
     for i, bullet in ipairs(self.bullets) do
         bullet:update(dt)
         if bullet.dead then
@@ -225,9 +235,14 @@ function Game:update(dt)
 end
 
 function Game:draw()
+    local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
+    love.graphics.print("mouse_x " .. tostring(mouse_pos_x))
+    love.graphics.print("mouse_y " .. tostring(mouse_pos_y), 0, 10)
+    love.graphics.print("player_x " .. tostring(self.player.x), 0, 20)
+    love.graphics.print("player_y " .. tostring(self.player.y), 0, 30)
+    love.graphics.print("Mouse angle " .. tostring(math.atan2(mouse_pos_y - self.player.y, mouse_pos_x - self.player.x)), 0, 40)
     for i = 1, #self.drawable_objects do
         self.drawable_objects[i]:draw()
-        self:shoot()
     end
     for i = 1, #self.bullets do
         self.bullets[i]:draw()
