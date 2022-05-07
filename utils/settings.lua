@@ -11,6 +11,6 @@ Bullet_damage = 1
 Bullet_lifetime = 1000
 Bullet_spread = 1
 Bullet_delay = 0.5
-Bullet_amount = 10
+Bullet_amount = 0
 Oscilation_size = 0
 Wave_size = 0

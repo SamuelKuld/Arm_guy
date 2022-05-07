@@ -20,7 +20,8 @@ function Bullet.new(x, y, angle, owner)
 end
 
 function Bullet:draw()
-    -- love.graphics.print("Angle " .. self.angle, self.x_start, self.y_start)
+    if self.x_end < Screen_size[1] / 2 then love.graphics.print("Angle " .. self.angle, self.x_start, self.y_start)
+    else love.graphics.print("Angle " .. self.angle, self.x_start - 100, self.y_start) end
     love.graphics.setColor(Bullet_color)
     love.graphics.line(self.x_start, self.y_start, self.x_end, self.y_end)
 end
@@ -51,24 +52,20 @@ function Bullet:update(dt)
         self.y_end = Screen_size[2] - 1
         self.angle = -(self.angle)
     end
-    if self.y_end <= 0 then
+    if self.y_end < 0 then
         self.y_start = 1
         self.y_end = 1
         self.angle = -(self.angle)
     end
-    if self.x_end <= 0 and not (self.angle > 0) then
-        self.x_end = 1
-        self.x_start = 1
-        self.angle = self.angle + math.pi / 2
-    elseif self.x_end <= 0 and self.angle > 0 then
-        self.x_end = 1
-        self.x_start = 1
-        self.angle = self.angle - math.pi / 2
+    if self.y_end <= 0 then
+        self.y_start = 1
+        self.y_end = 1
+        self.angle = self.angle / 2
     end
-    if self.x_end > Screen_size[1] then
-        self.x_end = Screen_size[1] - 1
-        self.x_start = Screen_size[1] - 1
-        self.angle = self.angle - math.pi / 2
+    if self.x_end >= Screen_size[1] then
+        self.x_end = Screen_size[1] - 3
+        self.x_start = Screen_size[1] - 3
+        self.angle = self.angle - 1.12
     end
     if self.Bullet_life > self.Bullet_lifetime then
         self.dead = true
