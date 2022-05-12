@@ -4,12 +4,14 @@ Bullet = {}
 Bullet.__index = Bullet
 function Bullet.new(x, y, angle, owner)
     local self = setmetatable({}, Bullet)
-    self.x_start = x + math.random(-Bullet_spread, Bullet_spread) * 2
-    self.y_start = y + math.random(-Bullet_spread, Bullet_spread) * 2
-    self.angle = angle + (math.random(-Bullet_spread, Bullet_spread) * .0001)
-    self.speed = Bullet_speed + math.random(-Bullet_random_speed_factor, Bullet_random_speed_factor) * .01
+    self.x_start = x
+    self.y_start = y
+    self.x_end = x + math.cos(angle) * Bullet_size
+    self.y_end = y + math.sin(angle) * Bullet_size
+    self.angle = angle + (math.random(-Bullet_spread, Bullet_spread) * .01)
+    self.speed = Bullet_speed
     self.damage = Bullet_damage
-    self.Bullet_lifetime = math.random(-Bullet_lifetime, Bullet_lifetime)
+    self.Bullet_lifetime = math.random(-Bullet_lifetime, Bullet_lifetime * 10) * .01
     self.owner = owner
     self.Bullet_life = 0
     self.dead = false
@@ -21,24 +23,35 @@ function Bullet:draw()
     if self.x_end < Screen_size[1] / 2 then love.graphics.print("Angle " .. self.angle, self.x_start, self.y_start)
     else love.graphics.print("Angle " .. self.angle, self.x_start - 100, self.y_start) end
     love.graphics.setColor(Bullet_color)
-    love.graphics.circle("line", self.x_start, self.y_start, 1)
+    love.graphics.line(self.x_start, self.y_start, self.x_end, self.y_end)
 end
 
 function Bullet:update(dt)
-    if self.speed < 600 * Bullet_death_speed_factor then
-        self.dead = true
-    end
     self.Bullet_life = self.Bullet_life + dt
-    self.x_start = (self.x_start + (math.cos(self.angle) * dt * self.speed) + math.random(-Oscilation_size, Oscilation_size))
-    self.y_start = (self.y_start + (math.sin(self.angle) * dt * self.speed) + math.random(-Oscilation_size, Oscilation_size))
-    self.x_start = self.x_start + Wave_size
-    self.speed = self.speed - (.999 * Bullet_speed_slow_factor)
-    if self.y_start >= Screen_size[2] then
-        self.y_start = Screen_size[2] - 1
-        self.angle = -(self.angle) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
-        self.speed = self.speed - (.9 * Bullet_death_speed_factor)
+    if self.right then
+        self.x_start = self.x_start + (math.cos(self.angle) * self.speed * dt) + Oscilation_size
+        self.y_start = self.y_start + (math.sin(self.angle) * self.speed * dt) + Oscilation_size
+        self.x_end = self.x_end + (math.cos(self.angle) * self.speed * dt) + Oscilation_size
+        self.y_end = self.y_end + (math.sin(self.angle) * self.speed * dt) + Oscilation_size
+        if math.random(0, 1) == 1 then
+            self.right = false
+        end
+    else
+        self.x_start = self.x_start + (math.cos(self.angle) * self.speed * dt) - Oscilation_size
+        self.y_start = self.y_start + (math.sin(self.angle) * self.speed * dt) - Oscilation_size
+        self.x_end = self.x_end + (math.cos(self.angle) * self.speed * dt) - Oscilation_size
+        self.y_end = self.y_end + (math.sin(self.angle) * self.speed * dt) - Oscilation_size
+        if math.random(0, 1) == 1 then
+            self.right = true
+        end
     end
-<<<<<<< Updated upstream
+    self.x_start = self.x_start + Wave_size
+    self.x_end = self.x_end + Wave_size
+    if self.y_end >= Screen_size[2] then
+        self.y_start = Screen_size[2] - 1
+        self.y_end = Screen_size[2] - 1
+        self.angle = -(self.angle)
+    end
     if self.y_end < 0 then
         self.y_start = 1
         self.y_end = 1
@@ -53,34 +66,6 @@ function Bullet:update(dt)
         self.x_end = Screen_size[1] - 3
         self.x_start = Screen_size[1] - 3
         self.angle = self.angle - 1.12
-=======
-    if self.y_start <= 0 then
-        self.y_start = 1
-        self.angle = -(self.angle) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
-        self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
-    end
-    -- Shooting left wall and shot from angle greater than 0 (Below the player)
-    if self.x_start <= 0 and not (self.angle > 0) then
-        self.x_start = 5
-        self.angle = -(math.pi / 4) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
-        self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
-    elseif self.x_start <= 0 and self.angle > 0 then -- Shooting left wall and shot from angle less than 0 (Above the player)
-        self.x_start = 1
-        -- bounce off right wall
-        self.angle = (math.pi / 4) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
-        self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
-    end
-
-    -- Shooting right wall and shot from angle greater than 0 (Below the player)
-    if self.x_start > Screen_size[1] and self.angle > 0 then
-        self.x_start = Screen_size[1] - 1
-        self.angle = math.pi - math.pi / 4 + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
-        self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
-    elseif self.x_start > Screen_size[1] and self.angle < 0 then -- Shooting right wall and shot from angle less than 0 (Above the player)
-        self.x_start = Screen_size[1] - 1
-        self.angle = -math.pi + math.pi / 4 + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
-        self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
->>>>>>> Stashed changes
     end
     if self.Bullet_life > self.Bullet_lifetime then
         self.dead = true
