@@ -1,15 +1,25 @@
 require("utils/settings")
 
+Wheel_Value = 0
+
+function love.wheelmoved(x, y)
+    if y < 0 and Wheel_Value > 0 then
+        Wheel_Value = Wheel_Value + y * Scroll_multiplier
+    elseif y > 0 then
+        Wheel_Value = Wheel_Value + y * Scroll_multiplier
+    end
+end
+
 Bullet = {}
 Bullet.__index = Bullet
 function Bullet.new(x, y, angle, owner)
     local self = setmetatable({}, Bullet)
-    self.x_start = x + math.random(-Bullet_spread, Bullet_spread) * 2
-    self.y_start = y + math.random(-Bullet_spread, Bullet_spread) * 2
-    self.angle = angle + (math.random(-Bullet_spread, Bullet_spread) * .0001)
-    self.speed = Bullet_speed + math.random(-Bullet_random_speed_factor, Bullet_random_speed_factor) * .01
+    self.speed = Wheel_Value * 1000 + Bullet_speed
+    self.angle = (angle + (math.random(-Bullet_spread, Bullet_spread) * .001))
+    self.x_start = x
+    self.y_start = y
     self.damage = Bullet_damage
-    self.Bullet_lifetime = math.random(-Bullet_lifetime, Bullet_lifetime)
+    self.Bullet_lifetime = Bullet_lifetime
     self.owner = owner
     self.Bullet_life = 0
     self.dead = false
@@ -18,10 +28,12 @@ function Bullet.new(x, y, angle, owner)
 end
 
 function Bullet:draw()
-    if self.x_end < Screen_size[1] / 2 then love.graphics.print("Angle " .. self.angle, self.x_start, self.y_start)
-    else love.graphics.print("Angle " .. self.angle, self.x_start - 100, self.y_start) end
     love.graphics.setColor(Bullet_color)
-    love.graphics.circle("line", self.x_start, self.y_start, 1)
+    love.graphics.line(self.x_start ,
+        self.y_start,
+        self.x_start - math.cos(self.angle) * self.speed * Bullet_size,
+        self.y_start - math.sin(self.angle) * self.speed * Bullet_size
+    )
 end
 
 function Bullet:update(dt)
@@ -29,58 +41,40 @@ function Bullet:update(dt)
         self.dead = true
     end
     self.Bullet_life = self.Bullet_life + dt
-    self.x_start = (self.x_start + (math.cos(self.angle) * dt * self.speed) + math.random(-Oscilation_size, Oscilation_size))
-    self.y_start = (self.y_start + (math.sin(self.angle) * dt * self.speed) + math.random(-Oscilation_size, Oscilation_size))
-    self.x_start = self.x_start + Wave_size
+    self.x_start = (self.x_start + (math.cos(self.angle) * dt * self.speed) + math.random(Oscilation_size))
+    self.y_start = (self.y_start + (math.sin(self.angle) * dt * self.speed) + math.random(Oscilation_size))
     self.speed = self.speed - (.999 * Bullet_speed_slow_factor)
     if self.y_start >= Screen_size[2] then
         self.y_start = Screen_size[2] - 1
-        self.angle = -(self.angle) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
+        self.angle = -(self.angle) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .0001
         self.speed = self.speed - (.9 * Bullet_death_speed_factor)
     end
-<<<<<<< Updated upstream
-    if self.y_end < 0 then
-        self.y_start = 1
-        self.y_end = 1
-        self.angle = -(self.angle)
-    end
-    if self.y_end <= 0 then
-        self.y_start = 1
-        self.y_end = 1
-        self.angle = self.angle / 2
-    end
-    if self.x_end >= Screen_size[1] then
-        self.x_end = Screen_size[1] - 3
-        self.x_start = Screen_size[1] - 3
-        self.angle = self.angle - 1.12
-=======
     if self.y_start <= 0 then
         self.y_start = 1
-        self.angle = -(self.angle) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
+        self.angle = -(self.angle) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .0001
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
     end
     -- Shooting left wall and shot from angle greater than 0 (Below the player)
     if self.x_start <= 0 and not (self.angle > 0) then
         self.x_start = 5
-        self.angle = -(math.pi / 4) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
+        self.angle = -math.pi - self.angle + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .0001
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
     elseif self.x_start <= 0 and self.angle > 0 then -- Shooting left wall and shot from angle less than 0 (Above the player)
-        self.x_start = 1
+        self.x_start = 5
         -- bounce off right wall
-        self.angle = (math.pi / 4) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
+        self.angle = -math.pi - self.angle + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .0001
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
     end
 
     -- Shooting right wall and shot from angle greater than 0 (Below the player)
     if self.x_start > Screen_size[1] and self.angle > 0 then
         self.x_start = Screen_size[1] - 1
-        self.angle = math.pi - math.pi / 4 + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
+        self.angle = -math.pi - self.angle
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
     elseif self.x_start > Screen_size[1] and self.angle < 0 then -- Shooting right wall and shot from angle less than 0 (Above the player)
         self.x_start = Screen_size[1] - 1
-        self.angle = -math.pi + math.pi / 4 + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .01
+        self.angle = -math.pi - self.angle
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
->>>>>>> Stashed changes
     end
     if self.Bullet_life > self.Bullet_lifetime then
         self.dead = true
@@ -116,7 +110,7 @@ function Game.new()
     game.width, game.height = love.graphics.getWidth(), love.graphics.getHeight()
     game.scaleX, game.scaleY = Screen_size[1] / 800, Screen_size[2] / 600
     game.player.size = game.scaleX * game.player.size
-    love.window.setMode(Screen_size[1], Screen_size[2])
+    love.window.setMode(Screen_size[1], Screen_size[2], {fullscreen = Full_screen})
     game.drawable_objects = { game.player }
     game.bullets = {}
     game.shoot_timer1 = 0
@@ -248,11 +242,7 @@ end
 
 function Game:draw()
     local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
-    love.graphics.print("mouse_x " .. tostring(mouse_pos_x))
-    love.graphics.print("mouse_y " .. tostring(mouse_pos_y), 0, 10)
-    love.graphics.print("player_x " .. tostring(self.player.x), 0, 20)
-    love.graphics.print("player_y " .. tostring(self.player.y), 0, 30)
-    love.graphics.print("Mouse angle " .. tostring(math.atan2(mouse_pos_y - self.player.y, mouse_pos_x - self.player.x)), 0, 40)
+    love.graphics.print("Scroll Result : " .. Wheel_Value * 1000, 10, 10)
     for i = 1, #self.drawable_objects do
         self.drawable_objects[i]:draw()
     end
