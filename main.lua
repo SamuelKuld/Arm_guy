@@ -1,6 +1,6 @@
 
 
-local game = require("utils/game").new()
+local game = require("game").new()
 
 
 function love.load()
