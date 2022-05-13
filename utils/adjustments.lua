@@ -5,7 +5,7 @@ Weapon = {}
 Weapon.__index = Weapon
 function Weapon.new()
     local weapon = {}
-    weapon.name = "default"
+    weapon.name = "Pistol"
     weapon.Bullet_color = { 1, 0, 0 }
     weapon.Bullet_speed = 1000
     weapon.Bullet_size = .01
@@ -14,7 +14,6 @@ function Weapon.new()
     weapon.Bullet_spread = 50
     weapon.Bullet_delay = 0.1
     weapon.Bullet_amount = 0
-    weapon.Wave_size = 0
     weapon.Reflection_innaccuracy = 100
     weapon.Bullet_random_speed_factor = 0
     weapon.Bullet_death_speed_factor = 0
@@ -28,7 +27,7 @@ Shotgun1 = {}
 Shotgun1.__index = Shotgun1
 function Shotgun1.new()
     local shotgun1 = Weapon.new()
-    shotgun1.name = "Shabammer!"
+    shotgun1.name = "Mini Shotgun"
     shotgun1.Bullet_color = { 1, .5, 0 }
     shotgun1.Bullet_speed = 3000
     shotgun1.Bullet_size = .01
@@ -46,18 +45,37 @@ Machinegun = {}
 Machinegun.__index = Machinegun
 function Machinegun.new()
     local machinegun = Weapon.new()
-    machinegun.name = "Machinegun"
+    machinegun.name = "Mini Machinegun"
     machinegun.Bullet_color = { 1, 0, 0 }
     machinegun.Bullet_speed = 1000
     machinegun.Bullet_size = .01
     machinegun.Bullet_damage = 1
-    machinegun.Bullet_delay = 0.01
+    machinegun.Bullet_delay = 0.05
     machinegun.Bullet_amount = 0
     machinegun.Bullet_spread = 100
     machinegun.Bullet_lifetime = .8
     machinegun.reflection_count = 2
     setmetatable(machinegun, Machinegun)
     return machinegun
+end
+
+
+Sniper_Rifle = {}
+Sniper_Rifle.__index = Sniper_Rifle
+function Sniper_Rifle.new()
+    local sniper_rifle = Weapon.new()
+    sniper_rifle.name = "Mini Sniper Rifle"
+    sniper_rifle.Bullet_color = { 1, 0, 0 }
+    sniper_rifle.Bullet_speed = 5000
+    sniper_rifle.Bullet_size = .1
+    sniper_rifle.Bullet_damage = 10
+    sniper_rifle.Bullet_delay = 1
+    sniper_rifle.Bullet_amount = 0
+    sniper_rifle.Bullet_spread = 1
+    sniper_rifle.Bullet_lifetime = 5
+    sniper_rifle.reflection_count = 5
+    setmetatable(sniper_rifle, Sniper_Rifle)
+    return sniper_rifle
 end
 
 
@@ -69,11 +87,13 @@ Player_size = 10
 Player_color = { 1, 1, 1 }
 Movement_increment = 50
 Scroll_multiplier = .1
-
+Min_enemy_size, Max_enemy_size = 10, 50
+Min_enemy_speed, Max_enemy_speed = 100, 500
 
 -- Reference-able weapons
 Weapons = {
     Weapon.new,
     Shotgun1.new,
-    Machinegun.new
+    Machinegun.new,
+    Sniper_Rifle.new
 }

@@ -1,4 +1,5 @@
 require("utils/adjustments")
+require("enemy")
 
 Wheel_Value = 0
 
@@ -12,12 +13,12 @@ end
 
 Bullet = {}
 Bullet.__index = Bullet
-function Bullet.new(x, y, angle, owner)
+function Bullet.new(x, y, angle, owner, bullet_size)
     local self = setmetatable({}, Bullet)
     self.speed = Wheel_Value * 1000 + Bullet_speed
     self.angle = (angle + (math.random(-Bullet_spread, Bullet_spread) * .001))
-    self.x_start = x
-    self.y_start = y
+    self.x_start = x + math.cos(self.angle) * self.speed * Bullet_size
+    self.y_start = y + math.sin(self.angle) * self.speed * Bullet_size
     self.damage = Bullet_damage
     self.Bullet_lifetime = Bullet_lifetime
     self.owner = owner
@@ -26,6 +27,7 @@ function Bullet.new(x, y, angle, owner)
     self.dead = false
     self.right = true
     self.reflection_count = 0
+    self.Bullet_size = bullet_size or Bullet_size
     return self
 end
 
@@ -33,8 +35,8 @@ function Bullet:draw()
     love.graphics.setColor(Bullet_color)
     love.graphics.line(self.x_start,
         self.y_start,
-        self.x_start - math.cos(self.angle) * self.speed * Bullet_size,
-        self.y_start - math.sin(self.angle) * self.speed * Bullet_size
+        self.x_start - math.cos(self.angle) * self.speed * self.Bullet_size,
+        self.y_start - math.sin(self.angle) * self.speed * self.Bullet_size
     )
 end
 
@@ -107,6 +109,8 @@ function Player.new()
     player.coordinate = { player.x, player.y }
     player.drawable_object = love.graphics.circle
     player.velocity = { x = 0, y = 0 }
+    player.shoot_timer = 0
+    player.bullets = {}
     setmetatable(player, Player)
     return player
 end
@@ -119,7 +123,6 @@ end
 function Player:change_weapon(weapon_template)
     local weapon_index = Weapons[weapon_template]
     if weapon_index == nil then
-        print("Weapon not found")
         self.weapon = Weapons[1]()
     else
         self.weapon = weapon_index()
@@ -140,7 +143,6 @@ function Player:change_weapon(weapon_template)
     Bullet_random_speed_factor = self.weapon.Bullet_random_speed_factor
     Bullet_death_speed_factor = self.weapon.Bullet_death_speed_factor
     Bullet_speed_slow_factor = self.weapon.Bullet_speed_slow_factor
-
 end
 
 Game = {}
@@ -157,6 +159,7 @@ function Game.new()
     game.shoot_timer1 = 0
     game.player:change_weapon(1)
     game.current_weapon = 1
+    game.enemies = {Enemy.new()}
     setmetatable(game, Game)
     return game
 end
@@ -181,24 +184,23 @@ function Game:keypressed(key)
     end
 end
 
-function Game:slowY(dt)
-    self.player.velocity.y = self.player.velocity.y - Movement_increment
+function Player:slowY(dt)
+    self.velocity.y = self.velocity.y - Movement_increment
 end
 
-function Game:speedY(dt)
-    self.player.velocity.y = self.player.velocity.y + Movement_increment
+function Player:speedY(dt)
+    self.velocity.y = self.velocity.y + Movement_increment
 end
 
-function Game:slowX(dt)
-    self.player.velocity.x = self.player.velocity.x - Movement_increment
+function Player:slowX(dt)
+    self.velocity.x = self.velocity.x - Movement_increment
 end
 
-function Game:speedX(dt)
-    self.player.velocity.x = self.player.velocity.x + Movement_increment
+function Player:speedX(dt)
+    self.velocity.x = self.velocity.x + Movement_increment
 end
 
-
-function Game:checkKeys(dt)
+function Player:checkKeys(dt)
     local keys_are_pressed = false
     if love.keyboard.isDown("w") then
         self:slowY(dt)
@@ -236,67 +238,75 @@ function Inverse_keys_pressed()
     return inverse_keys_pressed
 end
 
-function Game:handle_collision()
-    if self.player.y - self.player.size < 0 then
-        self.player.y = self.player.size
-        self.player.velocity.y = .001
+function Player:handle_collision()
+    if self.y - self.size < 0 then
+        self.y = self.size
+        self.velocity.y = .001
     end
-    if self.player.x - self.player.size < 0 then
-        self.player.x = self.player.size
-        self.player.velocity.x = .001
+    if self.x - self.size < 0 then
+        self.x = self.size
+        self.velocity.x = .001
     end
-    if self.player.x + self.player.size > love.graphics.getWidth() + .1 then
-        self.player.x = love.graphics.getWidth() - self.player.size
-        self.player.velocity.x = .001
+    if self.x + self.size > love.graphics.getWidth() + .1 then
+        self.x = love.graphics.getWidth() - self.size
+        self.velocity.x = .001
     end
-    if self.player.y + self.player.size > love.graphics.getHeight() + .1 then
-        self.player.y = love.graphics.getHeight() - self.player.size
-        self.player.velocity.y = .001
+    if self.y + self.size > love.graphics.getHeight() + .1 then
+        self.y = love.graphics.getHeight() - self.size
+        self.velocity.y = .001
     end
 end
 
-
-function Game:update(dt)
-    self.shoot_timer1 = self.shoot_timer1 + dt
-    love.graphics.setColor(1, 0, 0, 1)
-
-    love.graphics.setColor(1, 1, 1, 1)
-    local keys_are_not_pressed = not self:checkKeys(dt)
-    local inverse_keys_pressed = Inverse_keys_pressed()
-    self:handle_collision()
-    self.player.x = self.player.x + self.player.velocity.x * dt
-    self.player.y = self.player.y + self.player.velocity.y * dt
-
-    if keys_are_not_pressed or inverse_keys_pressed then
-        self.player.velocity.x = self.player.velocity.x / 1.1
-        self.player.velocity.y = self.player.velocity.y / 1.1
-    end
-    if math.random(0, 1) == 1 then
-        Wave_size = -Wave_size
-    end
-    if love.mouse.isDown("1") and self.shoot_timer1 > Bullet_delay then
+function Player:shoot()
+    if love.mouse.isDown("1") and self.shoot_timer > Bullet_delay then
         local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
         for i = 0, Bullet_amount do
             table.insert(self.bullets,
-                Bullet.new(self.player.x,
-                    self.player.y,
-                    math.atan2(mouse_pos_y - self.player.y,
-                        mouse_pos_x - self.player.x),
-                    self.player))
-            self.shoot_timer1 = 0
+                Bullet.new(self.x,
+                    self.y,
+                    math.atan2(mouse_pos_y - self.y,
+                        mouse_pos_x - self.x),
+                    self, self.weapon.Bullet_size))
+            self.shoot_timer = 0
         end
     end
+end
+
+function Player:update(dt)
+    self.shoot_timer = self.shoot_timer + dt
+    local keys_are_not_pressed = not self:checkKeys(dt)
+    local inverse_keys_pressed = Inverse_keys_pressed()
+    self.x = self.x + self.velocity.x * dt
+    self.y = self.y + self.velocity.y * dt
+    if keys_are_not_pressed or inverse_keys_pressed then
+        self.velocity.x = self.velocity.x / 1.1
+        self.velocity.y = self.velocity.y / 1.1
+    end
+
+    self:shoot()
+
     for i, bullet in ipairs(self.bullets) do
         bullet:update(dt)
         if bullet.dead then
             table.remove(self.bullets, i)
         end
     end
+    self:handle_collision()
 end
 
-function Game:render_bullets()
+function Player:render_bullets()
     for i = 1, #self.bullets do
         self.bullets[i]:draw()
+    end
+end
+
+function Game:update(dt)
+    self.player:update(dt)
+    for i, enemy in ipairs(self.enemies) do
+        enemy:update(dt)
+        if enemy.dead then
+            table.remove(self.enemies, i)
+        end
     end
 end
 
@@ -312,13 +322,13 @@ function Render_mouse(x, y)
 end
 
 function Game:draw()
+    for enemy = 1, #self.enemies do
+        self.enemies[enemy]:draw()
+    end
     local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
-
     self.player:draw()
-    self:render_bullets()
+    self.player:render_bullets()
     Render_mouse(mouse_pos_x, mouse_pos_y)
-
-
 end
 
 return Game
