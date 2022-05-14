@@ -88,7 +88,7 @@ Player_color = { 1, 1, 1 }
 Movement_increment = 50
 Scroll_multiplier = .1
 Min_enemy_size, Max_enemy_size = 10, 50
-Min_enemy_speed, Max_enemy_speed = 100, 500
+Min_enemy_speed, Max_enemy_speed = 5, 10
 
 -- Reference-able weapons
 Weapons = {

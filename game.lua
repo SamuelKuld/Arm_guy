@@ -303,7 +303,7 @@ end
 function Game:update(dt)
     self.player:update(dt)
     for i, enemy in ipairs(self.enemies) do
-        enemy:update(dt)
+        enemy:update(dt, self.player)
         if enemy.dead then
             table.remove(self.enemies, i)
         end
