@@ -2,6 +2,7 @@ require("utils/adjustments")
 require("enemy")
 
 Wheel_Value = 0
+Entities = 0
 
 function love.wheelmoved(x, y)
     if y < 0 and Wheel_Value > 0 then
@@ -14,6 +15,7 @@ end
 Bullet = {}
 Bullet.__index = Bullet
 function Bullet.new(x, y, angle, owner, bullet_size)
+    Entities = Entities + 1
     local self = setmetatable({}, Bullet)
     self.speed = Wheel_Value * 1000 + Bullet_speed
     self.angle = (angle + (math.random(-Bullet_spread, Bullet_spread) * .001))
@@ -21,7 +23,8 @@ function Bullet.new(x, y, angle, owner, bullet_size)
     self.y_start = y + math.sin(self.angle) * self.speed * Bullet_size
     self.damage = Bullet_damage
     self.Bullet_lifetime = Bullet_lifetime
-    self.owner = owner
+    self.owner_id = owner.id
+    self.owner_type = owner.type
     self.owner_gun = owner.weapon
     self.Bullet_life = 0
     self.dead = false
@@ -30,7 +33,13 @@ function Bullet.new(x, y, angle, owner, bullet_size)
     self.Bullet_size = bullet_size or Bullet_size
     return self
 end
-
+function Bullet:collides(other)
+    if self.dead then return false end
+    if math.sqrt((self.x_start - other.x)^2 + (self.y_start - other.y)^2) < other.size then
+        return true
+    end
+    return false
+end
 function Bullet:draw()
     love.graphics.setColor(Bullet_color)
     love.graphics.line(self.x_start,
@@ -63,27 +72,24 @@ function Bullet:update(dt)
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
         self.reflection_count = self.reflection_count + 1
     end
-    -- Shooting left wall and shot from angle greater than 0 (Below the player)
     if self.x_start <= 0 and not (self.angle > 0) then
         self.x_start = 5
         self.angle = -math.pi - self.angle + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .0001
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
         self.reflection_count = self.reflection_count + 1
-    elseif self.x_start <= 0 and self.angle > 0 then -- Shooting left wall and shot from angle less than 0 (Above the player)
+    elseif self.x_start <= 0 and self.angle > 0 then
         self.x_start = 5
-        -- bounce off right wall
         self.angle = -math.pi - self.angle + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .0001
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
         self.reflection_count = self.reflection_count + 1
     end
 
-    -- Shooting right wall and shot from angle greater than 0 (Below the player)
     if self.x_start > Screen_size[1] and self.angle > 0 then
         self.x_start = Screen_size[1] - 1
         self.angle = -math.pi - self.angle
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
         self.reflection_count = self.reflection_count + 1
-    elseif self.x_start > Screen_size[1] and self.angle < 0 then -- Shooting right wall and shot from angle less than 0 (Above the player)
+    elseif self.x_start > Screen_size[1] and self.angle < 0 then
         self.x_start = Screen_size[1] - 1
         self.angle = -math.pi - self.angle
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
@@ -96,16 +102,19 @@ function Bullet:update(dt)
         self.dead = true
     end
 end
-
 Player = {}
 Player.__index = Player
 function Player.new()
+    Entities = Entities + 1
     local player = {}
+    player.is_enemy = false
     player.weapon = Weapons[1]()
     player.x = 0
     player.y = 0
+    player.id = Entities
     player.color = Player_color
     player.size = Player_size
+    player.type = "player"
     player.coordinate = { player.x, player.y }
     player.drawable_object = love.graphics.circle
     player.velocity = { x = 0, y = 0 }
@@ -159,7 +168,8 @@ function Game.new()
     game.shoot_timer1 = 0
     game.player:change_weapon(1)
     game.current_weapon = 1
-    game.enemies = {Enemy.new()}
+    game.enemies = { Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+}
     setmetatable(game, Game)
     return game
 end
@@ -292,6 +302,7 @@ function Player:update(dt)
         end
     end
     self:handle_collision()
+
 end
 
 function Player:render_bullets()
@@ -304,8 +315,21 @@ function Game:update(dt)
     self.player:update(dt)
     for i, enemy in ipairs(self.enemies) do
         enemy:update(dt, self.player)
-        if enemy.dead then
+        if enemy.is_dead then
             table.remove(self.enemies, i)
+        end
+    end
+
+    for bullet=1 , #self.player.bullets do
+        bullet = self.player.bullets[bullet]
+        if bullet.owner_type == "player" then
+            for enemy = 1, #self.enemies do
+                if bullet:collides(self.enemies[enemy]) then
+                    self.enemies[enemy]:damage(bullet.damage)
+                    print("Hit enemy")
+                    bullet.dead = true
+                end
+            end
         end
     end
 end

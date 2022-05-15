@@ -1,4 +1,4 @@
-
+math.randomseed(os.time())
 
 local game = require("game").new()
 

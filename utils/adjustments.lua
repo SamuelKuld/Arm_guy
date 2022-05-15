@@ -31,7 +31,7 @@ function Shotgun1.new()
     shotgun1.Bullet_color = { 1, .5, 0 }
     shotgun1.Bullet_speed = 3000
     shotgun1.Bullet_size = .01
-    shotgun1.Bullet_damage = .1
+    shotgun1.Bullet_damage = 1
     shotgun1.Bullet_delay = .5
     shotgun1.Bullet_amount = 10
     shotgun1.Bullet_spread = 100
@@ -52,7 +52,7 @@ function Machinegun.new()
     machinegun.Bullet_damage = 1
     machinegun.Bullet_delay = 0.05
     machinegun.Bullet_amount = 0
-    machinegun.Bullet_spread = 100
+    machinegun.Bullet_spread = 200
     machinegun.Bullet_lifetime = .8
     machinegun.reflection_count = 2
     setmetatable(machinegun, Machinegun)
@@ -67,7 +67,7 @@ function Sniper_Rifle.new()
     sniper_rifle.name = "Mini Sniper Rifle"
     sniper_rifle.Bullet_color = { 1, 0, 0 }
     sniper_rifle.Bullet_speed = 5000
-    sniper_rifle.Bullet_size = .1
+    sniper_rifle.Bullet_size = .05
     sniper_rifle.Bullet_damage = 10
     sniper_rifle.Bullet_delay = 1
     sniper_rifle.Bullet_amount = 0
@@ -88,8 +88,8 @@ Player_color = { 1, 1, 1 }
 Movement_increment = 50
 Scroll_multiplier = .1
 Min_enemy_size, Max_enemy_size = 10, 50
-Min_enemy_speed, Max_enemy_speed = 5, 10
-
+Min_enemy_speed, Max_enemy_speed = 100, 200
+Min_enemy_health, Max_enemy_health = 5, 10
 -- Reference-able weapons
 Weapons = {
     Weapon.new,
