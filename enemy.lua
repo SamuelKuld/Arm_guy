@@ -19,6 +19,9 @@ function Enemy.new(x, y, speed, health, damage, weapon, name, color, radius)
     enemy.is_hit_color = { 1, 1, 1 }
     enemy.is_hit_color_timer = 0
     enemy.velocity = { x=0, y=0 }
+    enemy.timer = 0
+    enemy.weapon = Enemy_gun
+    print(enemy.owner_gun)
     enemy.x = x or math.random(0 + enemy.size, Screen_size[1] - enemy.size)
     enemy.y = y or math.random(0 + enemy.size, Screen_size[2] - enemy.size)
     setmetatable(enemy, Enemy)
@@ -26,7 +29,11 @@ function Enemy.new(x, y, speed, health, damage, weapon, name, color, radius)
 end
 
 function Enemy:shoot(player)
-
+    if self.timer >= 1 then
+        self.timer = 0
+        local bullet = Bullet.new(self.x, self.y, math.atan2(player.y - self.y, player.x - self.x), self)
+        return bullet
+    end
 end
 
 function Enemy:damage(bullet_damage)
@@ -93,6 +100,7 @@ function Enemy:update(dt, player)
     self:step_closer_to_player(player, dt)
     self.x = self.x + self.velocity.x
     self.y = self.y + self.velocity.y
+
 end
 
 function Enemy:draw()

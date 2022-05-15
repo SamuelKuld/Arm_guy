@@ -14,23 +14,24 @@ end
 
 Bullet = {}
 Bullet.__index = Bullet
-function Bullet.new(x, y, angle, owner, bullet_size)
+function Bullet.new(x, y, angle, owner)
     Entities = Entities + 1
     local self = setmetatable({}, Bullet)
-    self.speed = Wheel_Value * 1000 + Bullet_speed
+    self.owner_gun = owner.weapon
+    self.speed = Wheel_Value * 1000 + self.owner_gun.Bullet_speed
     self.angle = (angle + (math.random(-Bullet_spread, Bullet_spread) * .001))
     self.x_start = x + math.cos(self.angle) * self.speed * Bullet_size
     self.y_start = y + math.sin(self.angle) * self.speed * Bullet_size
-    self.damage = Bullet_damage
-    self.Bullet_lifetime = Bullet_lifetime
+    self.damage = self.owner_gun.Bullet_damage
+    self.Bullet_lifetime = self.owner_gun.Bullet_lifetime
     self.owner_id = owner.id
     self.owner_type = owner.type
-    self.owner_gun = owner.weapon
+    self.Bullet_color = self.owner_gun.Bullet_color
     self.Bullet_life = 0
     self.dead = false
     self.right = true
     self.reflection_count = 0
-    self.Bullet_size = bullet_size or Bullet_size
+    self.Bullet_size = self.owner_gun.Bullet_size
     return self
 end
 function Bullet:collides(other)
@@ -41,7 +42,7 @@ function Bullet:collides(other)
     return false
 end
 function Bullet:draw()
-    love.graphics.setColor(Bullet_color)
+    love.graphics.setColor(self.Bullet_color)
     love.graphics.line(self.x_start,
         self.y_start,
         self.x_start - math.cos(self.angle) * self.speed * self.Bullet_size,
@@ -98,6 +99,7 @@ function Bullet:update(dt)
     if self.Bullet_life > self.Bullet_lifetime then
         self.dead = true
     end
+
     if self.reflection_count == self.owner_gun.reflection_count then
         self.dead = true
     end
@@ -112,6 +114,7 @@ function Player.new()
     player.x = 0
     player.y = 0
     player.id = Entities
+    player.health = 100
     player.color = Player_color
     player.size = Player_size
     player.type = "player"
@@ -127,6 +130,13 @@ end
 function Player:draw()
     love.graphics.setColor(self.color[1], self.color[2], self.color[3], self.color[4])
     self.drawable_object("fill", self.x, self.y, self.size)
+
+    -- Draw health bar above player
+    love.graphics.setColor(255, .2, .2, 255)
+    love.graphics.rectangle("fill", self.x - self.size, self.y - self.size - 20, self.size * 2, self.size / 2 - 20)
+    love.graphics.setColor(0, 255, 0, 255)
+    love.graphics.rectangle("fill", self.x - self.size, self.y - self.size - 20, self.size * 2 * (self.health / 100)  , self.size / 2 - 20)
+
 end
 
 function Player:change_weapon(weapon_template)
@@ -170,6 +180,7 @@ function Game.new()
     game.current_weapon = 1
     game.enemies = { Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
 }
+    game.score = 0
     setmetatable(game, Game)
     return game
 end
@@ -276,7 +287,7 @@ function Player:shoot()
                     self.y,
                     math.atan2(mouse_pos_y - self.y,
                         mouse_pos_x - self.x),
-                    self, self.weapon.Bullet_size))
+                    self))
             self.shoot_timer = 0
         end
     end
@@ -310,13 +321,31 @@ function Player:render_bullets()
         self.bullets[i]:draw()
     end
 end
+function Player:damage(bullet_damage)
+    self.health = self.health - bullet_damage
+end
+function Game:render_bullets()
+    for i = 1, #self.bullets do
+        self.bullets[i]:draw()
+    end
+end
 
 function Game:update(dt)
     self.player:update(dt)
+    for i, bullet in ipairs(self.bullets) do
+        bullet:update(dt)
+        if bullet.dead then
+            table.remove(self.bullets, i)
+        end
+    end
     for i, enemy in ipairs(self.enemies) do
+        local bullet = enemy:shoot(self.player)
+        table.insert(self.bullets, bullet)
         enemy:update(dt, self.player)
         if enemy.is_dead then
             table.remove(self.enemies, i)
+            table.insert(self.enemies, Enemy.new())
+            self.score = self.score + 1
         end
     end
 
@@ -332,6 +361,21 @@ function Game:update(dt)
             end
         end
     end
+    for bullet=1, #self.bullets do
+        bullet = self.bullets[bullet]
+        if bullet.owner_type == "enemy" then
+            if bullet:collides(self.player) then
+                self.player:damage(bullet.damage)
+                print("Hit player")
+                bullet.dead = true
+            end
+        end
+    end
+
+
+    if self.player.health <= 0 then
+        self.game_over = true
+    end
 end
 
 function Render_mouse(x, y)
@@ -346,13 +390,24 @@ function Render_mouse(x, y)
 end
 
 function Game:draw()
-    for enemy = 1, #self.enemies do
-        self.enemies[enemy]:draw()
+    if self.game_over then
+        love.graphics.setColor(1, 0, 0, 1)
+        love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2)
+        love.graphics.print("Score : " .. self.score, love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2 + 50)
+        Render_mouse(love.mouse.getX(), love.mouse.getY())
+        function Game:update()
+
+        end
+    else
+        for enemy = 1, #self.enemies do
+            self.enemies[enemy]:draw()
+        end
+        local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
+        self.player:draw()
+        self.player:render_bullets()
+        Render_mouse(mouse_pos_x, mouse_pos_y)
+        self:render_bullets()
     end
-    local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
-    self.player:draw()
-    self.player:render_bullets()
-    Render_mouse(mouse_pos_x, mouse_pos_y)
 end
 
 return Game

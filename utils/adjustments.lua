@@ -80,8 +80,8 @@ end
 
 
 -- Base Values
-Full_screen = false
-Screen_size = { 1000, 1000 }
+Full_screen = true
+Screen_size = { 1920, 1080 }
 StartPos = { 0, 0 }
 Player_size = 10
 Player_color = { 1, 1, 1 }
@@ -90,6 +90,7 @@ Scroll_multiplier = .1
 Min_enemy_size, Max_enemy_size = 10, 50
 Min_enemy_speed, Max_enemy_speed = 100, 200
 Min_enemy_health, Max_enemy_health = 5, 10
+Enemy_gun = Weapon.new()
 -- Reference-able weapons
 Weapons = {
     Weapon.new,
