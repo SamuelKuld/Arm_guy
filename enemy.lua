@@ -6,21 +6,22 @@ function Enemy.new(x, y, speed, health, damage, weapon, name, color, radius)
     local enemy = {}
     Entities = Entities + 1
     enemy.speed = speed or math.random(Min_enemy_speed, Max_enemy_speed)
-    enemy.health = health or math.random(Min_enemy_health, Max_enemy_health)
+    enemy.size = radius or math.random(Min_enemy_size, Max_enemy_size)
+    enemy.health = health or math.random(enemy.size, enemy.size)
     enemy.damage = damage
     enemy.weapon = weapon
     enemy.type = "enemy"
     enemy.timer = 0
     enemy.name = name
     enemy.color = color or { math.random(0, 100) * .01, math.random(0, 100) * .01, math.random(0, 100) * .01 }
-    enemy.size = radius or math.random(Min_enemy_size, Max_enemy_size)
     enemy.is_dead = false
     enemy.is_enemy = true
     enemy.is_hit_color = { 1, 1, 1 }
     enemy.is_hit_color_timer = 0
     enemy.velocity = { x=0, y=0 }
-    enemy.timer = 0
-    enemy.weapon = Enemy_gun
+    enemy.timer = math.random(0, 100) * .01
+    -- enemy.weapon = random enemy weapon
+    enemy.weapon = Enemy_weapons[math.random(1, #Enemy_weapons)]()
     print(enemy.owner_gun)
     enemy.x = x or math.random(0 + enemy.size, Screen_size[1] - enemy.size)
     enemy.y = y or math.random(0 + enemy.size, Screen_size[2] - enemy.size)
@@ -29,8 +30,7 @@ function Enemy.new(x, y, speed, health, damage, weapon, name, color, radius)
 end
 
 function Enemy:shoot(player)
-    if self.timer >= 1 then
-        self.timer = 0
+    if self.timer >= self.weapon.Bullet_delay then
         local bullet = Bullet.new(self.x, self.y, math.atan2(player.y - self.y, player.x - self.x), self)
         return bullet
     end
@@ -54,20 +54,16 @@ function Enemy:step_closer_to_player(Player, dt)
     local playerx_to_enemy = self.x - Player.x
     local playery_to_enemy = self.y - Player.y
     local distance_to_player = math.sqrt(playerx_to_enemy * playerx_to_enemy + playery_to_enemy * playery_to_enemy)
-    if distance_to_player <= 500 and distance_to_player > 1 then
+    if distance_to_player <= 1000 and distance_to_player > 1 then
         if playerx_to_enemy > -distance_to_player /2 then
-            self.velocity.x = self.velocity.x - self.speed / 4 * dt
-            self.velocity.x = self.velocity.x + self.speed / 8 * dt
+            self.velocity.x = self.velocity.x - self.speed / 10 * dt
         elseif playerx_to_enemy < distance_to_player / 2 then
-            self.velocity.x = self.velocity.x + self.speed / 4 * dt
-            self.velocity.x = self.velocity.x - self.speed / 8 * dt
+            self.velocity.x = self.velocity.x + self.speed / 10 * dt
         end
         if playery_to_enemy > -distance_to_player /2 then
-            self.velocity.y = self.velocity.y - self.speed / 4 * dt
-            self.velocity.y = self.velocity.y + self.speed / 8 * dt
+            self.velocity.y = self.velocity.y - self.speed / 10 * dt
         elseif playery_to_enemy < distance_to_player /2 then
-            self.velocity.y = self.velocity.y + self.speed / 4 * dt
-            self.velocity.y = self.velocity.y - self.speed / 8 * dt
+            self.velocity.y = self.velocity.y + self.speed / 10 * dt
         end
     elseif distance_to_player > 10 then
         self.velocity.x, self.velocity.y = 0,0
@@ -98,8 +94,8 @@ function Enemy:update(dt, player)
         self.velocity.y = -self.velocity.y
     end
     self:step_closer_to_player(player, dt)
-    self.x = self.x + self.velocity.x
-    self.y = self.y + self.velocity.y
+    self.x = self.x + self.velocity.x * .5
+    self.y = self.y + self.velocity.y * .5
 
 end
 
