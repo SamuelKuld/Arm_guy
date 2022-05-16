@@ -19,7 +19,7 @@ function Bullet.new(x, y, angle, owner)
     local self = setmetatable({}, Bullet)
     self.owner_gun = owner.weapon
     self.speed = Wheel_Value * 1000 + self.owner_gun.Bullet_speed
-    self.angle = (angle + (math.random(-Bullet_spread, Bullet_spread) * .001))
+    self.angle = (angle + (math.random(-self.owner_gun.Bullet_spread, self.owner_gun.Bullet_spread) * .001))
     self.x_start = x + math.cos(self.angle) * self.speed * Bullet_size
     self.y_start = y + math.sin(self.angle) * self.speed * Bullet_size
     self.damage = self.owner_gun.Bullet_damage
@@ -339,14 +339,20 @@ function Game:update(dt)
         end
     end
     for i, enemy in ipairs(self.enemies) do
-        local bullet = enemy:shoot(self.player)
-        table.insert(self.bullets, bullet)
+        for i = 0, enemy.weapon.Bullet_amount do
+            if enemy.timer >= enemy.weapon.Bullet_delay then
+                local bullet = enemy:shoot(self.player)
+                table.insert(self.bullets, bullet)
+                enemy.timer = 0
+            end
+        end
         enemy:update(dt, self.player)
         if enemy.is_dead then
             table.remove(self.enemies, i)
             table.insert(self.enemies, Enemy.new())
             self.score = self.score + 1
         end
+        enemy.timer = enemy.timer + dt
     end
 
     for bullet=1 , #self.player.bullets do

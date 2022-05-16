@@ -80,21 +80,48 @@ end
 
 
 -- Base Values
-Full_screen = true
-Screen_size = { 1920, 1080 }
+Full_screen = false
+Screen_size = { 1000, 1000 }
 StartPos = { 0, 0 }
 Player_size = 10
 Player_color = { 1, 1, 1 }
 Movement_increment = 50
 Scroll_multiplier = .1
-Min_enemy_size, Max_enemy_size = 10, 50
+Min_enemy_size, Max_enemy_size = 30, 50
 Min_enemy_speed, Max_enemy_speed = 100, 200
 Min_enemy_health, Max_enemy_health = 5, 10
-Enemy_gun = Weapon.new()
+Enemy_gun = Shotgun1.new()
 -- Reference-able weapons
 Weapons = {
     Weapon.new,
     Shotgun1.new,
     Machinegun.new,
     Sniper_Rifle.new
+}
+
+
+Weapon_enemy = {}
+Weapon_enemy.__index = Weapon_enemy
+function Weapon_enemy.new()
+    local weapon_enemy = {}
+    weapon_enemy.name = "Pistol"
+    weapon_enemy.Bullet_color = { 0, 1, 0 }
+    weapon_enemy.Bullet_speed = 750
+    weapon_enemy.Bullet_size = .05
+    weapon_enemy.Bullet_damage = 1
+    weapon_enemy.Bullet_lifetime = 2
+    weapon_enemy.Bullet_spread = 50
+    weapon_enemy.Bullet_delay = 1
+    weapon_enemy.Bullet_amount = 0
+    weapon_enemy.Reflection_innaccuracy = 100
+    weapon_enemy.Bullet_random_speed_factor = 0
+    weapon_enemy.Bullet_death_speed_factor = 0
+    weapon_enemy.Bullet_speed_slow_factor = 0
+    weapon_enemy.reflection_count = 3
+    setmetatable(weapon_enemy, Weapon_enemy)
+    return weapon_enemy
+end
+
+Enemy_weapons = {
+    Weapon_enemy.new,
 }
