@@ -114,7 +114,7 @@ function Player.new()
     player.x = 0
     player.y = 0
     player.id = Entities
-    player.health = 100
+    player.health, player.initial_health = 50, 50
     player.color = Player_color
     player.size = Player_size
     player.type = "player"
@@ -131,11 +131,10 @@ function Player:draw()
     love.graphics.setColor(self.color[1], self.color[2], self.color[3], self.color[4])
     self.drawable_object("fill", self.x, self.y, self.size)
 
-    -- Draw health bar above player
     love.graphics.setColor(255, .2, .2, 255)
-    love.graphics.rectangle("fill", self.x - self.size, self.y - self.size - 20, self.size * 2, self.size / 2 - 20)
+    love.graphics.rectangle("fill", self.x - self.size, self.y - self.size * 2, self.size * 2, 10)
     love.graphics.setColor(0, 255, 0, 255)
-    love.graphics.rectangle("fill", self.x - self.size, self.y - self.size - 20, self.size * 2 * (self.health / 100)  , self.size / 2 - 20)
+    love.graphics.rectangle("fill", self.x - self.size, self.y - self.size * 2, self.size * 2 * (self.health / self.initial_health), 10)
 
 end
 

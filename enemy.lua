@@ -7,7 +7,7 @@ function Enemy.new(x, y, speed, health, damage, weapon, name, color, radius)
     Entities = Entities + 1
     enemy.speed = speed or math.random(Min_enemy_speed, Max_enemy_speed)
     enemy.size = radius or math.random(Min_enemy_size, Max_enemy_size)
-    enemy.health = health or math.random(enemy.size, enemy.size)
+    enemy.health = health or enemy.size / 10
     enemy.damage = damage
     enemy.weapon = weapon
     enemy.type = "enemy"
@@ -54,16 +54,16 @@ function Enemy:step_closer_to_player(Player, dt)
     local playerx_to_enemy = self.x - Player.x
     local playery_to_enemy = self.y - Player.y
     local distance_to_player = math.sqrt(playerx_to_enemy * playerx_to_enemy + playery_to_enemy * playery_to_enemy)
-    if distance_to_player <= 1000 and distance_to_player > 1 then
+    if distance_to_player > 1 then
         if playerx_to_enemy > -distance_to_player /2 then
-            self.velocity.x = self.velocity.x - self.speed / 10 * dt
-        elseif playerx_to_enemy < distance_to_player / 2 then
             self.velocity.x = self.velocity.x + self.speed / 10 * dt
+        elseif playerx_to_enemy > distance_to_player / 2 then
+            self.velocity.x = self.velocity.x - self.speed / 10 * dt
         end
-        if playery_to_enemy > -distance_to_player /2 then
-            self.velocity.y = self.velocity.y - self.speed / 10 * dt
-        elseif playery_to_enemy < distance_to_player /2 then
+        if playery_to_enemy > -distance_to_player / 2 then
             self.velocity.y = self.velocity.y + self.speed / 10 * dt
+        elseif playery_to_enemy > distance_to_player / 2 then
+            self.velocity.y = self.velocity.y - self.speed / 10 * dt
         end
     elseif distance_to_player > 10 then
         self.velocity.x, self.velocity.y = 0,0
