@@ -31,6 +31,7 @@ end
 
 function Enemy:shoot(player)
     if self.timer >= self.weapon.Bullet_delay then
+        Enemy_noise()
         local bullet = Bullet.new(self.x, self.y, math.atan2(player.y - self.y, player.x - self.x), self)
         return bullet
     end
@@ -40,6 +41,7 @@ function Enemy:damage(bullet_damage)
     self.health = self.health - bullet_damage
     self.color[1] = self.color[1] + bullet_damage * .1
     self.color[2], self.color[3] = self.color[2] - bullet_damage * .1, self.color[3] - bullet_damage * .1
+    Enemy_hurt()
     if self.health <= 0 then
         self.is_dead = true
     end

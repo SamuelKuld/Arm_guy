@@ -66,23 +66,27 @@ function Bullet:update(dt)
         self.angle = -(self.angle) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .0001
         self.speed = self.speed - (.9 * Bullet_death_speed_factor)
         self.reflection_count = self.reflection_count + 1
+        Boing()
     end
     if self.y_start <= 0 then
         self.y_start = 1
         self.angle = -(self.angle) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .0001
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
         self.reflection_count = self.reflection_count + 1
+        Boing()
     end
     if self.x_start <= 0 and not (self.angle > 0) then
         self.x_start = 5
         self.angle = -math.pi - self.angle + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .0001
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
         self.reflection_count = self.reflection_count + 1
+        Boing()
     elseif self.x_start <= 0 and self.angle > 0 then
         self.x_start = 5
         self.angle = -math.pi - self.angle + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .0001
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
         self.reflection_count = self.reflection_count + 1
+        Boing()
     end
 
     if self.x_start > Screen_size[1] and self.angle > 0 then
@@ -90,11 +94,13 @@ function Bullet:update(dt)
         self.angle = -math.pi - self.angle
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
         self.reflection_count = self.reflection_count + 1
+        Boing()
     elseif self.x_start > Screen_size[1] and self.angle < 0 then
         self.x_start = Screen_size[1] - 1
         self.angle = -math.pi - self.angle
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
         self.reflection_count = self.reflection_count + 1
+        Boing()
     end
     if self.Bullet_life > self.Bullet_lifetime then
         self.dead = true
@@ -279,6 +285,7 @@ end
 
 function Player:shoot()
     if love.mouse.isDown("1") and self.shoot_timer > Bullet_delay then
+        Player_noise()
         local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
         for i = 0, Bullet_amount do
             table.insert(self.bullets,
@@ -322,6 +329,7 @@ function Player:render_bullets()
 end
 function Player:damage(bullet_damage)
     self.health = self.health - bullet_damage
+    Player_hurt()
 end
 function Game:render_bullets()
     for i = 1, #self.bullets do
@@ -347,6 +355,7 @@ function Game:update(dt)
         end
         enemy:update(dt, self.player)
         if enemy.is_dead then
+            Enemy_death()
             table.remove(self.enemies, i)
             table.insert(self.enemies, Enemy.new())
             self.score = self.score + 1
@@ -380,6 +389,7 @@ function Game:update(dt)
 
     if self.player.health <= 0 then
         self.game_over = true
+        Player_death()
     end
 end
 

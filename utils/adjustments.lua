@@ -91,6 +91,57 @@ Min_enemy_size, Max_enemy_size = 30, 50
 Min_enemy_speed, Max_enemy_speed = 100, 200
 Min_enemy_health, Max_enemy_health = 5, 10
 Enemy_gun = Shotgun1.new()
+Player_pew = love.audio.newSource("utils/player_pew.wav", "static")
+Enemy_pew = love.audio.newSource("utils/enemy_pew.wav", "stream")
+Player_damage = love.audio.newSource("utils/player_damage.wav", "static")
+Enemy_damage = love.audio.newSource("utils/enemy_damage.wav", "static")
+Player_dead = love.audio.newSource("utils/player_death.wav", "static")
+Enemy_dead = love.audio.newSource("utils/enemy_death.wav", "static")
+Bong = love.audio.newSource("utils/boing.wav", "stream")
+
+function Boing()
+end
+
+
+
+function Enemy_death()
+    Enemy_damage:stop()
+    Enemy_dead:play()
+end
+
+function Player_death()
+    Player_damage:stop()
+    Player_pew:stop()
+    Enemy_pew:stop()
+    Enemy_damage:stop()
+    Player_dead:setVolume(4)
+    Player_dead:play()
+end
+
+
+function Enemy_hurt()
+    Enemy_damage:stop()
+    Enemy_damage:setPitch(math.random(5, 15) * .1)
+    Enemy_damage:play()
+end
+
+function Player_hurt()
+    Player_damage:play()
+end
+
+function Enemy_noise()
+    Enemy_pew:setPitch(math.random(5, 15) * .1)
+    Enemy_pew:play()
+end
+
+function Player_noise()
+    if Player_pew:isPlaying() then
+        Player_pew:stop()
+    end
+    Player_pew:setPitch(math.random(5, 15) * .1)
+    Player_pew:play()
+end
+
 -- Reference-able weapons
 Weapons = {
     Weapon.new,
