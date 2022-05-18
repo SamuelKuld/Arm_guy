@@ -22,7 +22,6 @@ function Enemy.new(x, y, speed, health, damage, weapon, name, color, radius)
     enemy.timer = math.random(0, 100) * .01
     -- enemy.weapon = random enemy weapon
     enemy.weapon = Enemy_weapons[math.random(1, #Enemy_weapons)]()
-    print(enemy.owner_gun)
     enemy.x = x or math.random(0 + enemy.size, Screen_size[1] - enemy.size)
     enemy.y = y or math.random(0 + enemy.size, Screen_size[2] - enemy.size)
     setmetatable(enemy, Enemy)

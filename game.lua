@@ -184,7 +184,10 @@ function Game.new()
     game.player:change_weapon(1)
     game.current_weapon = 1
     game.enemies = { Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
-}
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+    }
     game.score = 0
     setmetatable(game, Game)
     return game
@@ -369,7 +372,6 @@ function Game:update(dt)
             for enemy = 1, #self.enemies do
                 if bullet:collides(self.enemies[enemy]) then
                     self.enemies[enemy]:damage(bullet.damage)
-                    print("Hit enemy")
                     bullet.dead = true
                 end
             end
@@ -380,7 +382,6 @@ function Game:update(dt)
         if bullet.owner_type == "enemy" then
             if bullet:collides(self.player) then
                 self.player:damage(bullet.damage)
-                print("Hit player")
                 bullet.dead = true
             end
         end
