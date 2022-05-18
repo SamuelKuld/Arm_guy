@@ -415,6 +415,8 @@ function Game:draw()
 
         end
     else
+        love.graphics.setColor(0, 1, 0, 1)
+        love.graphics.print(self.score, love.graphics.getWidth() - 50, love.graphics.getHeight() - 50)
         for enemy = 1, #self.enemies do
             self.enemies[enemy]:draw()
         end

@@ -7,18 +7,18 @@ function Weapon.new()
     local weapon = {}
     weapon.name = "Pistol"
     weapon.Bullet_color = { 1, 0, 0 }
-    weapon.Bullet_speed = 1000
+    weapon.Bullet_speed = 10000
     weapon.Bullet_size = .0001
-    weapon.Bullet_damage = .1
-    weapon.Bullet_lifetime = 500
-    weapon.Bullet_spread = 50
+    weapon.Bullet_damage = 100
+    weapon.Bullet_lifetime = 5000
+    weapon.Bullet_spread = 500
     weapon.Bullet_delay = 0
-    weapon.Bullet_amount = 50
+    weapon.Bullet_amount = 100
     weapon.Reflection_innaccuracy = 100
     weapon.Bullet_random_speed_factor = 10
     weapon.Bullet_death_speed_factor = 0
     weapon.Bullet_speed_slow_factor = 0
-    weapon.reflection_count = 3
+    weapon.reflection_count = 10
     setmetatable(weapon, Weapon)
     return weapon
 end
@@ -156,19 +156,19 @@ Weapon_enemy.__index = Weapon_enemy
 function Weapon_enemy.new()
     local weapon_enemy = {}
     weapon_enemy.name = "Pistol"
-    weapon_enemy.Bullet_color = { 0, 1, 0 }
-    weapon_enemy.Bullet_speed = 750
-    weapon_enemy.Bullet_size = .05
-    weapon_enemy.Bullet_damage = 1
-    weapon_enemy.Bullet_lifetime = 2
-    weapon_enemy.Bullet_spread = 50
-    weapon_enemy.Bullet_delay = 5
+    weapon_enemy.Bullet_color = { 1, 1, 0 }
+    weapon_enemy.Bullet_speed = 500
+    weapon_enemy.Bullet_size = 0.1
+    weapon_enemy.Bullet_damage = .0001
+    weapon_enemy.Bullet_lifetime = 5
+    weapon_enemy.Bullet_spread = 0
+    weapon_enemy.Bullet_delay = 0
     weapon_enemy.Bullet_amount = 0
-    weapon_enemy.Reflection_innaccuracy = 100
+    weapon_enemy.Reflection_innaccuracy = 0
     weapon_enemy.Bullet_random_speed_factor = 0
     weapon_enemy.Bullet_death_speed_factor = 0
     weapon_enemy.Bullet_speed_slow_factor = 0
-    weapon_enemy.reflection_count = 3
+    weapon_enemy.reflection_count = 1
     setmetatable(weapon_enemy, Weapon_enemy)
     return weapon_enemy
 end
