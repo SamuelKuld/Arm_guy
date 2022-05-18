@@ -1,5 +1,6 @@
 require("utils/adjustments")
 require("enemy")
+Gamera = require("gamera")
 
 Wheel_Value = 0
 Entities = 0
@@ -174,18 +175,14 @@ Game.__index = Game
 
 function Game.new()
     local game = {}
+    game.gamera = Gamera.new(0, 0, Screen_size[1], Screen_size[2])
+    game.gamera:setWindow(0, 0, 1920, 1080)
     game.player = Player.new()
-    game.width, game.height = love.graphics.getWidth(), love.graphics.getHeight()
-    game.scaleX, game.scaleY = Screen_size[1] / 800, Screen_size[2] / 600
-    game.player.size = game.scaleX * game.player.size
-    love.window.setMode(Screen_size[1], Screen_size[2], { fullscreen = Full_screen })
     game.bullets = {}
     game.shoot_timer1 = 0
     game.player:change_weapon(1)
     game.current_weapon = 1
     game.enemies = { Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
-        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
-        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
         Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
     }
     game.score = 0
@@ -276,12 +273,12 @@ function Player:handle_collision()
         self.x = self.size
         self.velocity.x = .001
     end
-    if self.x + self.size > love.graphics.getWidth() + .1 then
-        self.x = love.graphics.getWidth() - self.size
+    if self.x + self.size > Screen_size[1] + .1 then
+        self.x = Screen_size[1] - self.size
         self.velocity.x = .001
     end
-    if self.y + self.size > love.graphics.getHeight() + .1 then
-        self.y = love.graphics.getHeight() - self.size
+    if self.y + self.size > Screen_size[2] + .1 then
+        self.y = Screen_size[2] - self.size
         self.velocity.y = .001
     end
 end
@@ -405,27 +402,43 @@ function Render_mouse(x, y)
     love.graphics.circle("line", x, y, Bullet_spread / 4)
 end
 
-function Game:draw()
-    if self.game_over then
-        love.graphics.setColor(1, 0, 0, 1)
-        love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2)
-        love.graphics.print("Score : " .. self.score, love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2 + 50)
-        Render_mouse(love.mouse.getX(), love.mouse.getY())
-        function Game:update()
+function Game:draw_self()
+    local function draw()
+        if self.game_over then
+            love.graphics.setColor(1, 0, 0, 1)
+            love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2)
+            love.graphics.print("Score : " .. self.score, love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2 + 50)
+            Render_mouse(love.mouse.getX(), love.mouse.getY())
+            function Game:update()
 
+            end
+        else
+            love.graphics.setColor(0, 1, 0, 1)
+            love.graphics.print(self.score, love.graphics.getWidth() - 50, love.graphics.getHeight() - 50)
+            for enemy = 1, #self.enemies do
+                self.enemies[enemy]:draw()
+            end
+            local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
+            self.player:draw()
+            self.player:render_bullets()
+            Render_mouse(mouse_pos_x, mouse_pos_y)
+            self:render_bullets()
         end
-    else
-        love.graphics.setColor(0, 1, 0, 1)
-        love.graphics.print(self.score, love.graphics.getWidth() - 50, love.graphics.getHeight() - 50)
-        for enemy = 1, #self.enemies do
-            self.enemies[enemy]:draw()
-        end
-        local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
-        self.player:draw()
-        self.player:render_bullets()
-        Render_mouse(mouse_pos_x, mouse_pos_y)
-        self:render_bullets()
     end
+    local ini_x_pos, ini_y_pos = self.gamera:getPosition()
+    self.gamera:setPosition(self.player.x, self.player.y)
+    if self.gamera:getScale() > 1 then
+        local x_pos, y_pos = self.gamera:getPosition()
+        x_pos, y_pos = x_pos - ini_x_pos, y_pos - ini_y_pos
+        local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
+        love.mouse.setPosition(mouse_pos_x + x_pos, mouse_pos_y + y_pos)
+    end
+    self.gamera:setScale(Wheel_Value)
+    self.gamera:draw(draw)
+end
+
+function Game:draw()
+    self:draw_self()
 end
 
 return Game

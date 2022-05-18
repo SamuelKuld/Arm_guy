@@ -29,7 +29,10 @@ function Enemy.new(x, y, speed, health, damage, weapon, name, color, radius)
 end
 
 function Enemy:shoot(player)
-    if self.timer >= self.weapon.Bullet_delay then
+    local playerx_to_enemy = self.x - player.x
+    local playery_to_enemy = self.y - player.y
+    local distance_to_player = math.sqrt(playerx_to_enemy * playerx_to_enemy + playery_to_enemy * playery_to_enemy)
+    if self.timer >= self.weapon.Bullet_delay and distance_to_player < 500 then
         Enemy_noise()
         local bullet = Bullet.new(self.x, self.y, math.atan2(player.y - self.y, player.x - self.x), self)
         return bullet

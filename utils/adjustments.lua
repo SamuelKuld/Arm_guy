@@ -7,12 +7,12 @@ function Weapon.new()
     local weapon = {}
     weapon.name = "Pistol"
     weapon.Bullet_color = { 1, 0, 0 }
-    weapon.Bullet_speed = 10000
-    weapon.Bullet_size = .0001
+    weapon.Bullet_speed = 5000
+    weapon.Bullet_size = .1
     weapon.Bullet_damage = 100
-    weapon.Bullet_lifetime = 5000
-    weapon.Bullet_spread = 500
-    weapon.Bullet_delay = 0
+    weapon.Bullet_lifetime = 5
+    weapon.Bullet_spread = 100
+    weapon.Bullet_delay = .1
     weapon.Bullet_amount = 100
     weapon.Reflection_innaccuracy = 100
     weapon.Bullet_random_speed_factor = 10
@@ -81,7 +81,7 @@ end
 
 -- Base Values
 Full_screen = false
-Screen_size = { 1000, 1000 }
+Screen_size = { 1920, 1080 }
 StartPos = { 0, 0 }
 Player_size = 10
 Player_color = { 1, 1, 1 }
@@ -160,9 +160,9 @@ function Weapon_enemy.new()
     weapon_enemy.Bullet_speed = 500
     weapon_enemy.Bullet_size = 0.1
     weapon_enemy.Bullet_damage = .0001
-    weapon_enemy.Bullet_lifetime = 5
+    weapon_enemy.Bullet_lifetime = 1
     weapon_enemy.Bullet_spread = 0
-    weapon_enemy.Bullet_delay = 0
+    weapon_enemy.Bullet_delay = 1
     weapon_enemy.Bullet_amount = 0
     weapon_enemy.Reflection_innaccuracy = 0
     weapon_enemy.Bullet_random_speed_factor = 0
