@@ -8,7 +8,7 @@ function Weapon.new()
     weapon.name = "Pistol"
     weapon.Bullet_color = { 1, 0, 0 }
     weapon.Bullet_speed = 5000
-    weapon.Bullet_size = .1
+    weapon.Bullet_size = .01
     weapon.Bullet_damage = 100
     weapon.Bullet_lifetime = 5
     weapon.Bullet_spread = 100
@@ -81,7 +81,8 @@ end
 
 -- Base Values
 Full_screen = false
-Screen_size = { 1920, 1080 }
+love.mouse.setGrabbed(false)
+Screen_size = { 8000, 8000 }
 StartPos = { 0, 0 }
 Player_size = 10
 Player_color = { 1, 1, 1 }

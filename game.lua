@@ -177,6 +177,7 @@ function Game.new()
     local game = {}
     game.gamera = Gamera.new(0, 0, Screen_size[1], Screen_size[2])
     game.gamera:setWindow(0, 0, 1920, 1080)
+    love.window.setFullscreen(true)
     game.player = Player.new()
     game.bullets = {}
     game.shoot_timer1 = 0
@@ -427,12 +428,10 @@ function Game:draw_self()
     end
     local ini_x_pos, ini_y_pos = self.gamera:getPosition()
     self.gamera:setPosition(self.player.x, self.player.y)
-    if self.gamera:getScale() > 1 then
-        local x_pos, y_pos = self.gamera:getPosition()
-        x_pos, y_pos = x_pos - ini_x_pos, y_pos - ini_y_pos
-        local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
-        love.mouse.setPosition(mouse_pos_x + x_pos, mouse_pos_y + y_pos)
-    end
+    local x_pos, y_pos = self.gamera:getPosition()
+    x_pos, y_pos = x_pos - ini_x_pos, y_pos - ini_y_pos
+    local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
+    love.mouse.setPosition(mouse_pos_x + x_pos, mouse_pos_y + y_pos)
     self.gamera:setScale(Wheel_Value)
     self.gamera:draw(draw)
 end
