@@ -175,8 +175,10 @@ Game.__index = Game
 
 function Game.new()
     local game = {}
+    game.game_time = 0
     game.gamera = Gamera.new(0, 0, Screen_size[1], Screen_size[2])
-    game.gamera:setWindow(0, 0, 1920, 1080)
+    game.gamera:setWindow(0, 0, Game_resolution[1], Game_resolution[2])
+    game.actual_mouse = {x = 0, y = 0}
     love.window.setFullscreen(true)
     game.player = Player.new()
     game.bullets = {}
@@ -284,10 +286,10 @@ function Player:handle_collision()
     end
 end
 
-function Player:shoot()
+function Player:shoot(actual_mouse)
     if love.mouse.isDown("1") and self.shoot_timer > Bullet_delay then
         Player_noise()
-        local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
+        local mouse_pos_x, mouse_pos_y = actual_mouse.x, actual_mouse.y
         for i = 0, Bullet_amount do
             table.insert(self.bullets,
                 Bullet.new(self.x,
@@ -300,7 +302,7 @@ function Player:shoot()
     end
 end
 
-function Player:update(dt)
+function Player:update(dt, actual_mouse)
     self.shoot_timer = self.shoot_timer + dt
     local keys_are_not_pressed = not self:checkKeys(dt)
     local inverse_keys_pressed = Inverse_keys_pressed()
@@ -311,7 +313,7 @@ function Player:update(dt)
         self.velocity.y = self.velocity.y / 1.1
     end
 
-    self:shoot()
+    self:shoot(actual_mouse)
 
     for i, bullet in ipairs(self.bullets) do
         bullet:update(dt)
@@ -339,7 +341,19 @@ function Game:render_bullets()
 end
 
 function Game:update(dt)
-    self.player:update(dt)
+    self.game_time = self.game_time + dt
+    self.player:update(dt, self.actual_mouse)
+    local mouse_x, mouse_y = love.mouse.getPosition()
+    if self.game_time > .05 then
+        if mouse_x > 0 or mouse_y > 0 then
+            self.actual_mouse.x = self.actual_mouse.x + mouse_x - 800
+            self.actual_mouse.y = self.actual_mouse.y + mouse_y - 800
+        else
+            self.actual_mouse.x = self.actual_mouse.x
+            self.actual_mouse.y = self.actual_mouse.y
+        end
+    end
+    love.mouse.setPosition(800, 800)
     for i, bullet in ipairs(self.bullets) do
         bullet:update(dt)
         if bullet.dead then
@@ -393,6 +407,8 @@ function Game:update(dt)
 end
 
 function Render_mouse(x, y)
+    love.graphics.print(x)
+    love.graphics.print(y, 0, 20)
     love.graphics.setColor(1, 0, 0, 1)
     love.graphics.line(x, y + 2, x, y + 10)
     love.graphics.line(x, y - 2, x, y - 10)
@@ -409,7 +425,6 @@ function Game:draw_self()
             love.graphics.setColor(1, 0, 0, 1)
             love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2)
             love.graphics.print("Score : " .. self.score, love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2 + 50)
-            Render_mouse(love.mouse.getX(), love.mouse.getY())
             function Game:update()
 
             end
@@ -419,19 +434,18 @@ function Game:draw_self()
             for enemy = 1, #self.enemies do
                 self.enemies[enemy]:draw()
             end
-            local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
             self.player:draw()
             self.player:render_bullets()
-            Render_mouse(mouse_pos_x, mouse_pos_y)
             self:render_bullets()
         end
+        Render_mouse(self.actual_mouse.x, self.actual_mouse.y)
     end
     local ini_x_pos, ini_y_pos = self.gamera:getPosition()
     self.gamera:setPosition(self.player.x, self.player.y)
     local x_pos, y_pos = self.gamera:getPosition()
     x_pos, y_pos = x_pos - ini_x_pos, y_pos - ini_y_pos
-    local mouse_pos_x, mouse_pos_y = love.mouse.getPosition()
-    love.mouse.setPosition(mouse_pos_x + x_pos, mouse_pos_y + y_pos)
+    self.actual_mouse.x = self.actual_mouse.x + x_pos + self.gamera:getScale() - 1
+    self.actual_mouse.y = self.actual_mouse.y + y_pos + self.gamera:getScale() - 1
     self.gamera:setScale(Wheel_Value)
     self.gamera:draw(draw)
 end

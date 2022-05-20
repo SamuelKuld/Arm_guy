@@ -11,9 +11,9 @@ function Weapon.new()
     weapon.Bullet_size = .01
     weapon.Bullet_damage = 100
     weapon.Bullet_lifetime = 5
-    weapon.Bullet_spread = 100
-    weapon.Bullet_delay = .1
-    weapon.Bullet_amount = 100
+    weapon.Bullet_spread = 1000
+    weapon.Bullet_delay = 0
+    weapon.Bullet_amount = 500
     weapon.Reflection_innaccuracy = 100
     weapon.Bullet_random_speed_factor = 10
     weapon.Bullet_death_speed_factor = 0
@@ -87,7 +87,7 @@ StartPos = { 0, 0 }
 Player_size = 10
 Player_color = { 1, 1, 1 }
 Movement_increment = 50
-Scroll_multiplier = .1
+Scroll_multiplier = .01
 Min_enemy_size, Max_enemy_size = 30, 50
 Min_enemy_speed, Max_enemy_speed = 100, 200
 Min_enemy_health, Max_enemy_health = 5, 10
@@ -99,7 +99,8 @@ Enemy_damage = love.audio.newSource("utils/enemy_damage.wav", "static")
 Player_dead = love.audio.newSource("utils/player_death.wav", "static")
 Enemy_dead = love.audio.newSource("utils/enemy_death.wav", "static")
 Bong = love.audio.newSource("utils/boing.wav", "stream")
-
+Sensitivity = 1.1
+Game_resolution = {2048, 1152}
 function Boing()
 end
 
