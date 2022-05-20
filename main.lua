@@ -4,7 +4,6 @@ local game = require("game").new()
 
 
 function love.load()
-    love.mouse.setPosition(1000, 1000)
     game:load()
 end
 

@@ -27,7 +27,7 @@ function Bullet.new(x, y, angle, owner)
     self.Bullet_lifetime = self.owner_gun.Bullet_lifetime
     self.owner_id = owner.id
     self.owner_type = owner.type
-    self.Bullet_color = self.owner_gun.Bullet_color
+    self.Bullet_color = owner.weapon.Bullet_color
     self.Bullet_life = 0
     self.dead = false
     self.right = true
@@ -132,6 +132,7 @@ function Player.new()
     player.bullets = {}
     setmetatable(player, Player)
     return player
+
 end
 
 function Player:draw()
@@ -175,11 +176,12 @@ Game.__index = Game
 
 function Game.new()
     local game = {}
+    game.background = love.graphics.newImage("background.png", {})
     game.game_time = 0
     game.gamera = Gamera.new(0, 0, Screen_size[1], Screen_size[2])
     game.gamera:setWindow(0, 0, Game_resolution[1], Game_resolution[2])
     game.actual_mouse = {x = 0, y = 0}
-    love.window.setFullscreen(true)
+    love.window.setMode(Game_resolution[1], Game_resolution[2], {})
     game.player = Player.new()
     game.bullets = {}
     game.shoot_timer1 = 0
@@ -345,15 +347,23 @@ function Game:update(dt)
     self.player:update(dt, self.actual_mouse)
     local mouse_x, mouse_y = love.mouse.getPosition()
     if self.game_time > .05 then
-        if mouse_x > 0 or mouse_y > 0 then
-            self.actual_mouse.x = self.actual_mouse.x + mouse_x - 800
-            self.actual_mouse.y = self.actual_mouse.y + mouse_y - 800
-        else
-            self.actual_mouse.x = self.actual_mouse.x
-            self.actual_mouse.y = self.actual_mouse.y
-        end
+        self.actual_mouse.x = self.actual_mouse.x + ((mouse_x) - 800) * Sensitivity
+        self.actual_mouse.y = self.actual_mouse.y + ((mouse_y) - 800) * Sensitivity
     end
-    love.mouse.setPosition(800, 800)
+    if self.actual_mouse.x < 0 then
+        self.actual_mouse.x = 0
+    end
+    if self.actual_mouse.x > Screen_size[1] then
+        self.actual_mouse.x = Screen_size[1]
+    end
+    if self.actual_mouse.y < 0 then
+        self.actual_mouse.y = 0
+    end
+    if self.actual_mouse.y > Screen_size[2] then
+        self.actual_mouse.y = Screen_size[2]
+    end
+
+    love.mouse.setPosition(800 , 800)
     for i, bullet in ipairs(self.bullets) do
         bullet:update(dt)
         if bullet.dead then
@@ -421,6 +431,7 @@ end
 
 function Game:draw_self()
     local function draw()
+        love.graphics.draw(self.background, 0,0,0,  Screen_size[1] / 1000 ,Screen_size[2] /1000)
         if self.game_over then
             love.graphics.setColor(1, 0, 0, 1)
             love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2)
@@ -430,7 +441,6 @@ function Game:draw_self()
             end
         else
             love.graphics.setColor(0, 1, 0, 1)
-            love.graphics.print(self.score, love.graphics.getWidth() - 50, love.graphics.getHeight() - 50)
             for enemy = 1, #self.enemies do
                 self.enemies[enemy]:draw()
             end
@@ -440,12 +450,13 @@ function Game:draw_self()
         end
         Render_mouse(self.actual_mouse.x, self.actual_mouse.y)
     end
-    local ini_x_pos, ini_y_pos = self.gamera:getPosition()
+    local ini_x_pos, ini_y_pos = self.gamera:getVisibleCorners()
     self.gamera:setPosition(self.player.x, self.player.y)
-    local x_pos, y_pos = self.gamera:getPosition()
+    local x_pos, y_pos = self.gamera:getVisibleCorners()
     x_pos, y_pos = x_pos - ini_x_pos, y_pos - ini_y_pos
-    self.actual_mouse.x = self.actual_mouse.x + x_pos + self.gamera:getScale() - 1
-    self.actual_mouse.y = self.actual_mouse.y + y_pos + self.gamera:getScale() - 1
+    local gamera_x, gamera_y = self.gamera:getPosition()
+    self.actual_mouse.x = self.actual_mouse.x + x_pos
+    self.actual_mouse.y = self.actual_mouse.y + y_pos
     self.gamera:setScale(Wheel_Value)
     self.gamera:draw(draw)
 end

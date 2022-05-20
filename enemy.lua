@@ -41,13 +41,13 @@ end
 
 function Enemy:damage(bullet_damage)
     self.health = self.health - bullet_damage
-    self.color[1] = self.color[1] + bullet_damage * .1
-    self.color[2], self.color[3] = self.color[2] - bullet_damage * .1, self.color[3] - bullet_damage * .1
-    Enemy_hurt()
+    self.color[1] = 1 / self.health
+    self.color[2], self.color[3] = self.color[2] - self.color[1], self.color[2] - self.color[1]
     if self.health <= 0 then
         self.is_dead = true
+        return 
     end
-
+    Enemy_hurt()
 end
 function Enemy:add_random_velocity()
     self.velocity.x = self.velocity.x + math.random(-Max_enemy_speed, Max_enemy_speed)
