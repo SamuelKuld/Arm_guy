@@ -22,8 +22,8 @@ function Enemy.new(x, y, speed, health, damage, weapon, name, color, radius)
     enemy.timer = math.random(0, 100) * .01
     -- enemy.weapon = random enemy weapon
     enemy.weapon = Enemy_weapons[math.random(1, #Enemy_weapons)]()
-    enemy.x = x or math.random(0 + enemy.size, Screen_size[1] - enemy.size)
-    enemy.y = y or math.random(0 + enemy.size, Screen_size[2] - enemy.size)
+    enemy.x = x or math.random(0 + enemy.size, World_size.x - enemy.size)
+    enemy.y = y or math.random(0 + enemy.size, World_size.y - enemy.size)
     setmetatable(enemy, Enemy)
     return enemy
 end
@@ -32,7 +32,7 @@ function Enemy:shoot(player)
     local playerx_to_enemy = self.x - player.x
     local playery_to_enemy = self.y - player.y
     local distance_to_player = math.sqrt(playerx_to_enemy * playerx_to_enemy + playery_to_enemy * playery_to_enemy)
-    if self.timer >= self.weapon.Bullet_delay and distance_to_player < 500 then
+    if self.timer >= self.weapon.Bullet_delay and distance_to_player < 1000 then
         Enemy_noise()
         local bullet = Bullet.new(self.x, self.y, math.atan2(player.y - self.y, player.x - self.x), self)
         return bullet
@@ -45,7 +45,7 @@ function Enemy:damage(bullet_damage)
     self.color[2], self.color[3] = self.color[2] - self.color[1], self.color[2] - self.color[1]
     if self.health <= 0 then
         self.is_dead = true
-        return 
+        return
     end
     Enemy_hurt()
 end
@@ -59,12 +59,12 @@ function Enemy:step_closer_to_player(Player, dt)
     local playery_to_enemy = self.y - Player.y
     local distance_to_player = math.sqrt(playerx_to_enemy * playerx_to_enemy + playery_to_enemy * playery_to_enemy)
     if distance_to_player > 1 then
-        if playerx_to_enemy > -distance_to_player /2 then
+        if playerx_to_enemy < -distance_to_player /2 then
             self.velocity.x = self.velocity.x + self.speed / 10 * dt
         elseif playerx_to_enemy > distance_to_player / 2 then
             self.velocity.x = self.velocity.x - self.speed / 10 * dt
         end
-        if playery_to_enemy > -distance_to_player / 2 then
+        if playery_to_enemy < -distance_to_player / 2 then
             self.velocity.y = self.velocity.y + self.speed / 10 * dt
         elseif playery_to_enemy > distance_to_player / 2 then
             self.velocity.y = self.velocity.y - self.speed / 10 * dt
@@ -81,16 +81,16 @@ function Enemy:update(dt, player)
     if self.is_dead then
         return
     end
-    if self.x > Screen_size[1] - self.size then
-        self.x = Screen_size[1] - self.size
+    if self.x > World_size.x - self.size then
+        self.x = World_size.x - self.size
         self.velocity.x = -self.velocity.x
     end
     if self.x < 0 + self.size then
         self.x = 0 + self.size
         self.velocity.x = -self.velocity.x
     end
-    if self.y > Screen_size[2] - self.size then
-        self.y = Screen_size[2] - self.size
+    if self.y > World_size.y - self.size then
+        self.y = World_size.y - self.size
         self.velocity.y = -self.velocity.y
     end
     if self.y < 0 + self.size then

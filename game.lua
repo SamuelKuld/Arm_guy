@@ -1,6 +1,8 @@
 require("utils/adjustments")
 require("enemy")
+Menu = require("menu")
 Gamera = require("gamera")
+GameOver = require("game_over")
 
 Wheel_Value = 0
 Entities = 0
@@ -19,7 +21,7 @@ function Bullet.new(x, y, angle, owner)
     Entities = Entities + 1
     local self = setmetatable({}, Bullet)
     self.owner_gun = owner.weapon
-    self.speed = Wheel_Value * 1000 + self.owner_gun.Bullet_speed
+    self.speed = self.owner_gun.Bullet_speed
     self.angle = (angle + (math.random(-self.owner_gun.Bullet_spread, self.owner_gun.Bullet_spread) * .001))
     self.x_start = x + math.cos(self.angle) * self.speed * Bullet_size
     self.y_start = y + math.sin(self.angle) * self.speed * Bullet_size
@@ -35,13 +37,15 @@ function Bullet.new(x, y, angle, owner)
     self.Bullet_size = self.owner_gun.Bullet_size
     return self
 end
+
 function Bullet:collides(other)
     if self.dead then return false end
-    if math.sqrt((self.x_start - other.x)^2 + (self.y_start - other.y)^2) < other.size then
+    if math.sqrt((self.x_start - other.x) ^ 2 + (self.y_start - other.y) ^ 2) < other.size then
         return true
     end
     return false
 end
+
 function Bullet:draw()
     love.graphics.setColor(self.Bullet_color)
     love.graphics.line(self.x_start,
@@ -62,8 +66,8 @@ function Bullet:update(dt)
     self.y_start = (self.y_start + (math.sin(self.angle) * dt * self.speed))
 
 
-    if self.y_start >= Screen_size[2] then
-        self.y_start = Screen_size[2] - 1
+    if self.y_start >= World_size.y then
+        self.y_start = World_size.y - 1
         self.angle = -(self.angle) + math.random(-Reflection_innaccuracy, Reflection_innaccuracy) * .0001
         self.speed = self.speed - (.9 * Bullet_death_speed_factor)
         self.reflection_count = self.reflection_count + 1
@@ -90,14 +94,14 @@ function Bullet:update(dt)
         Boing()
     end
 
-    if self.x_start > Screen_size[1] and self.angle > 0 then
-        self.x_start = Screen_size[1] - 1
+    if self.x_start > World_size.x and self.angle > 0 then
+        self.x_start = World_size.x - 1
         self.angle = -math.pi - self.angle
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
         self.reflection_count = self.reflection_count + 1
         Boing()
-    elseif self.x_start > Screen_size[1] and self.angle < 0 then
-        self.x_start = Screen_size[1] - 1
+    elseif self.x_start > World_size.x and self.angle < 0 then
+        self.x_start = World_size.x - 1
         self.angle = -math.pi - self.angle
         self.speed = self.speed - (.9 * Bullet_speed_slow_factor)
         self.reflection_count = self.reflection_count + 1
@@ -111,6 +115,7 @@ function Bullet:update(dt)
         self.dead = true
     end
 end
+
 Player = {}
 Player.__index = Player
 function Player.new()
@@ -178,19 +183,131 @@ function Game.new()
     local game = {}
     game.background = love.graphics.newImage("background.png", {})
     game.game_time = 0
-    game.gamera = Gamera.new(0, 0, Screen_size[1], Screen_size[2])
-    game.gamera:setWindow(0, 0, Game_resolution[1], Game_resolution[2])
-    game.actual_mouse = {x = 0, y = 0}
-    love.window.setMode(Game_resolution[1], Game_resolution[2], {})
+    game.gamera = Gamera.new(0, 0, World_size.x, World_size.y)
+    game.gamera:setWindow(0, 0, Window_size[1], Window_size[2])
+    game.actual_mouse = { x = 0, y = 0 }
     game.player = Player.new()
     game.bullets = {}
     game.shoot_timer1 = 0
     game.player:change_weapon(1)
+    game.current_screen = 2
     game.current_weapon = 1
     game.enemies = { Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
+        Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
         Enemy.new(), Enemy.new(), Enemy.new(), Enemy.new(),
     }
     game.score = 0
+    game.screens = { game, Menu.new(game), GameOver.new(game) }
     setmetatable(game, Game)
     return game
 end
@@ -200,9 +317,6 @@ function Game:load()
 end
 
 function Game:keypressed(key)
-    if key == "escape" then
-        love.event.quit()
-    end
     if key == "space" then
         if self.current_weapon == #Weapons then
             self.current_weapon = 1
@@ -278,12 +392,12 @@ function Player:handle_collision()
         self.x = self.size
         self.velocity.x = .001
     end
-    if self.x + self.size > Screen_size[1] + .1 then
-        self.x = Screen_size[1] - self.size
+    if self.x + self.size > World_size.x + .1 then
+        self.x = World_size.x - self.size
         self.velocity.x = .001
     end
-    if self.y + self.size > Screen_size[2] + .1 then
-        self.y = Screen_size[2] - self.size
+    if self.y + self.size > World_size.y + .1 then
+        self.y = World_size.y - self.size
         self.velocity.y = .001
     end
 end
@@ -332,10 +446,12 @@ function Player:render_bullets()
         self.bullets[i]:draw()
     end
 end
+
 function Player:damage(bullet_damage)
     self.health = self.health - bullet_damage
     Player_hurt()
 end
+
 function Game:render_bullets()
     for i = 1, #self.bullets do
         self.bullets[i]:draw()
@@ -353,17 +469,17 @@ function Game:update(dt)
     if self.actual_mouse.x < 0 then
         self.actual_mouse.x = 0
     end
-    if self.actual_mouse.x > Screen_size[1] then
-        self.actual_mouse.x = Screen_size[1]
+    if self.actual_mouse.x > World_size.x then
+        self.actual_mouse.x = World_size.x
     end
     if self.actual_mouse.y < 0 then
         self.actual_mouse.y = 0
     end
-    if self.actual_mouse.y > Screen_size[2] then
-        self.actual_mouse.y = Screen_size[2]
+    if self.actual_mouse.y > World_size.y then
+        self.actual_mouse.y = World_size.y
     end
 
-    love.mouse.setPosition(800 , 800)
+    love.mouse.setPosition(800, 800)
     for i, bullet in ipairs(self.bullets) do
         bullet:update(dt)
         if bullet.dead then
@@ -388,7 +504,7 @@ function Game:update(dt)
         enemy.timer = enemy.timer + dt
     end
 
-    for bullet=1 , #self.player.bullets do
+    for bullet = 1, #self.player.bullets do
         bullet = self.player.bullets[bullet]
         if bullet.owner_type == "player" then
             for enemy = 1, #self.enemies do
@@ -399,7 +515,7 @@ function Game:update(dt)
             end
         end
     end
-    for bullet=1, #self.bullets do
+    for bullet = 1, #self.bullets do
         bullet = self.bullets[bullet]
         if bullet.owner_type == "enemy" then
             if bullet:collides(self.player) then
@@ -417,8 +533,7 @@ function Game:update(dt)
 end
 
 function Render_mouse(x, y)
-    love.graphics.print(x)
-    love.graphics.print(y, 0, 20)
+    love.mouse.setVisible(false)
     love.graphics.setColor(1, 0, 0, 1)
     love.graphics.line(x, y + 2, x, y + 10)
     love.graphics.line(x, y - 2, x, y - 10)
@@ -431,16 +546,16 @@ end
 
 function Game:draw_self()
     local function draw()
-        love.graphics.draw(self.background, 0,0,0,  Screen_size[1] / 1000 ,Screen_size[2] /1000)
+        love.graphics.draw(self.background, 0, 0, 0, World_size.x / 1000, World_size.y / 1000)
         if self.game_over then
             love.graphics.setColor(1, 0, 0, 1)
             love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2)
             love.graphics.print("Score : " .. self.score, love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2 + 50)
+            self.current_screen = 1
             function Game:update()
 
             end
         else
-            love.graphics.setColor(0, 1, 0, 1)
             for enemy = 1, #self.enemies do
                 self.enemies[enemy]:draw()
             end
@@ -450,11 +565,11 @@ function Game:draw_self()
         end
         Render_mouse(self.actual_mouse.x, self.actual_mouse.y)
     end
+
     local ini_x_pos, ini_y_pos = self.gamera:getVisibleCorners()
     self.gamera:setPosition(self.player.x, self.player.y)
     local x_pos, y_pos = self.gamera:getVisibleCorners()
     x_pos, y_pos = x_pos - ini_x_pos, y_pos - ini_y_pos
-    local gamera_x, gamera_y = self.gamera:getPosition()
     self.actual_mouse.x = self.actual_mouse.x + x_pos
     self.actual_mouse.y = self.actual_mouse.y + y_pos
     self.gamera:setScale(Wheel_Value)
