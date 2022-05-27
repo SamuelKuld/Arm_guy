@@ -1,20 +1,29 @@
 math.randomseed(os.time())
 
 local game = require("game").new()
+require("utils/adjustments")
+local menu = require("menu").new()
+
+
+Screens = {
+    game,
+    menu
+}
+Current_screen = 2
 
 
 function love.load()
-    game:load()
+    Screens[Current_screen]:load()
 end
 
 function love.draw()
-    game:draw()
+    Screens[Current_screen]:draw()
 end
 
 function love.keypressed(key)
-    game:keypressed(key)
+    Screens[Current_screen]:keypressed(key)
 end
 
 function love.update(dt)
-    game:update(dt)
+    Screens[Current_screen]:update(dt)
 end

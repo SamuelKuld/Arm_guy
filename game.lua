@@ -1,4 +1,3 @@
-require("utils/adjustments")
 require("enemy")
 Gamera = require("gamera")
 

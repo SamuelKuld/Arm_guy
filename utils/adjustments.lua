@@ -89,7 +89,7 @@ Player_color = { 1, 1, 1 }
 Movement_increment = 50
 Scroll_multiplier = .01
 Min_enemy_size, Max_enemy_size = 10, 50
-Min_enemy_speed, Max_enemy_speed = 10, 20
+Min_enemy_speed, Max_enemy_speed = 100, 200
 Min_enemy_health, Max_enemy_health = 5, 10
 Enemy_gun = Shotgun1.new()
 Player_pew = love.audio.newSource("utils/player_pew.wav", "static")
@@ -105,7 +105,7 @@ function Boing()
 end
 
 
-
+-- Sounds
 function Enemy_death()
     Enemy_damage:stop()
     Enemy_dead:play()
@@ -153,6 +153,7 @@ Weapons = {
 }
 
 
+-- Enemy Weapons
 Weapon_enemy = {}
 Weapon_enemy.__index = Weapon_enemy
 function Weapon_enemy.new()
@@ -161,8 +162,8 @@ function Weapon_enemy.new()
     weapon_enemy.Bullet_color = { 1, 1, 0 }
     weapon_enemy.Bullet_speed = 500
     weapon_enemy.Bullet_size = 0.1
-    weapon_enemy.Bullet_damage = .0001
-    weapon_enemy.Bullet_lifetime = 1
+    weapon_enemy.Bullet_damage = .1
+    weapon_enemy.Bullet_lifetime = 5
     weapon_enemy.Bullet_spread = 0
     weapon_enemy.Bullet_delay = 1
     weapon_enemy.Bullet_amount = 0
