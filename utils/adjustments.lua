@@ -7,7 +7,7 @@ function Weapon.new()
     local weapon = {}
     weapon.name = "Pistol"
     weapon.Bullet_color = { 1, 0, 0 }
-    weapon.Bullet_speed = 1000
+    weapon.Bullet_speed = 5000
     weapon.Bullet_size = .01
     weapon.Bullet_damage = .1
     weapon.Bullet_lifetime = 10
@@ -59,7 +59,6 @@ function Machinegun.new()
     return machinegun
 end
 
-
 Sniper_Rifle = {}
 Sniper_Rifle.__index = Sniper_Rifle
 function Sniper_Rifle.new()
@@ -78,16 +77,16 @@ function Sniper_Rifle.new()
     return sniper_rifle
 end
 
-
 -- Base Values
-Full_screen = false
+Full_screen = true
 love.mouse.setGrabbed(false)
-Screen_size = { 1920, 1080 }
+World_size = { x = 8000, y = 8000 }
+Window_size = {2048, 1152}
 StartPos = { 0, 0 }
 Player_size = 20
 Player_color = { 1, 1, 1 }
 Movement_increment = 50
-Scroll_multiplier = .01
+Scroll_multiplier = .1
 Min_enemy_size, Max_enemy_size = 10, 50
 Min_enemy_speed, Max_enemy_speed = 100, 200
 Min_enemy_health, Max_enemy_health = 5, 10
@@ -100,12 +99,12 @@ Player_dead = love.audio.newSource("utils/player_death.wav", "static")
 Enemy_dead = love.audio.newSource("utils/enemy_death.wav", "static")
 Bong = love.audio.newSource("utils/boing.wav", "stream")
 Sensitivity = 3
-Game_resolution = {1920, 1080}
 function Boing()
 end
 
 
 -- Sounds
+
 function Enemy_death()
     Enemy_damage:stop()
     Enemy_dead:play()
@@ -119,7 +118,6 @@ function Player_death()
     Player_dead:setVolume(4)
     Player_dead:play()
 end
-
 
 function Enemy_hurt()
     Enemy_damage:stop()
