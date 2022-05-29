@@ -1,4 +1,3 @@
-require("utils/adjustments")
 require("enemy")
 Menu = require("menu")
 Gamera = require("gamera")
@@ -317,6 +316,9 @@ function Game:load()
 end
 
 function Game:keypressed(key)
+    if key == "escape" then
+        Current_screen = 2
+    end
     if key == "space" then
         if self.current_weapon == #Weapons then
             self.current_weapon = 1
@@ -555,6 +557,10 @@ function Game:draw_self()
             function Game:update()
 
             end
+            Current_screen = 3
+            love.graphics.setColor(1, 0, 0, 1)
+            love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2)
+
         else
             for enemy = 1, #self.enemies do
                 self.enemies[enemy]:draw()
