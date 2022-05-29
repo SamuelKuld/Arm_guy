@@ -162,7 +162,7 @@ function Weapon_enemy.new()
     weapon_enemy.Bullet_color = { 1, 1, 0 }
     weapon_enemy.Bullet_speed = 500
     weapon_enemy.Bullet_size = 0.1
-    weapon_enemy.Bullet_damage = .1
+    weapon_enemy.Bullet_damage = 1
     weapon_enemy.Bullet_lifetime = 5
     weapon_enemy.Bullet_spread = 0
     weapon_enemy.Bullet_delay = 1

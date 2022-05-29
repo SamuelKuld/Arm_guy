@@ -200,7 +200,7 @@ end
 
 function Game:keypressed(key)
     if key == "escape" then
-        love.event.quit()
+        Current_screen = 2
     end
     if key == "space" then
         if self.current_weapon == #Weapons then
@@ -432,12 +432,13 @@ function Game:draw_self()
     local function draw()
         love.graphics.draw(self.background, 0,0,0,  Screen_size[1] / 1000 ,Screen_size[2] /1000)
         if self.game_over then
-            love.graphics.setColor(1, 0, 0, 1)
-            love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2)
-            love.graphics.print("Score : " .. self.score, love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2 + 50)
             function Game:update()
 
             end
+            Current_screen = 3
+            love.graphics.setColor(1, 0, 0, 1)
+            love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2)
+
         else
             love.graphics.setColor(0, 1, 0, 1)
             for enemy = 1, #self.enemies do

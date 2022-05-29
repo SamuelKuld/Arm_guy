@@ -3,11 +3,12 @@ math.randomseed(os.time())
 local game = require("game").new()
 require("utils/adjustments")
 local menu = require("menu").new()
-
+local death = require("dead").new()
 
 Screens = {
     game,
-    menu
+    menu,
+    death
 }
 Current_screen = 2
 
