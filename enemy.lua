@@ -22,8 +22,8 @@ function Enemy.new(x, y, speed, health, damage, weapon, name, color, radius)
     enemy.timer = math.random(0, 100) * .01
     -- enemy.weapon = random enemy weapon
     enemy.weapon = Enemy_weapons[math.random(1, #Enemy_weapons)]()
-    enemy.x = x or math.random(0 + enemy.size, World_size.x - enemy.size)
-    enemy.y = y or math.random(0 + enemy.size, World_size.y - enemy.size)
+    enemy.x = x or math.random(0 + enemy.size, Screen_size[1] - enemy.size)
+    enemy.y = y or math.random(0 + enemy.size, Screen_size[2] - enemy.size)
     setmetatable(enemy, Enemy)
     return enemy
 end
@@ -81,16 +81,16 @@ function Enemy:update(dt, player)
     if self.is_dead then
         return
     end
-    if self.x > World_size.x - self.size then
-        self.x = World_size.x - self.size
+    if self.x > Screen_size[1] - self.size then
+        self.x = Screen_size[1] - self.size
         self.velocity.x = -self.velocity.x
     end
     if self.x < 0 + self.size then
         self.x = 0 + self.size
         self.velocity.x = -self.velocity.x
     end
-    if self.y > World_size.y - self.size then
-        self.y = World_size.y - self.size
+    if self.y > Screen_size[2] - self.size then
+        self.y = Screen_size[2] - self.size
         self.velocity.y = -self.velocity.y
     end
     if self.y < 0 + self.size then
