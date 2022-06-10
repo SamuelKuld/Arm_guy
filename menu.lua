@@ -1,3 +1,5 @@
+require("utils.adjustments")
+
 Menu = {}
 Menu.__index = Menu
 
@@ -57,12 +59,14 @@ function Menu:keypressed(key)
         if self.current_selection > #self.selections then
             self.current_selection = 1
         end
+        Menu_noise()
     end
     if key == "up" or key == "w" then
         self.current_selection = self.current_selection - 1
         if self.current_selection < 1 then
             self.current_selection = #self.selections
         end
+        Menu_noise()
     end
 end
 

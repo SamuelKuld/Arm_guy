@@ -88,7 +88,7 @@ Player_size = 20
 Player_color = { 1, 1, 1 }
 Movement_increment = 50
 Scroll_multiplier = .01
-Min_enemy_size, Max_enemy_size = 10, 50
+Min_enemy_size, Max_enemy_size = 100, 500
 Min_enemy_speed, Max_enemy_speed = 100, 200
 Min_enemy_health, Max_enemy_health = 5, 10
 Enemy_gun = Shotgun1.new()
@@ -98,7 +98,7 @@ Player_damage = love.audio.newSource("utils/player_damage.wav", "static")
 Enemy_damage = love.audio.newSource("utils/enemy_damage.wav", "static")
 Player_dead = love.audio.newSource("utils/player_death.wav", "static")
 Enemy_dead = love.audio.newSource("utils/enemy_death.wav", "static")
-Bong = love.audio.newSource("utils/boing.wav", "stream")
+Menu_move = love.audio.newSource("utils/menu_noise.mp3", "stream")
 Sensitivity = 3
 Game_resolution = {1920, 1080}
 function Boing()
@@ -142,6 +142,11 @@ function Player_noise()
     end
     Player_pew:setPitch(math.random(5, 15) * .1)
     Player_pew:play()
+end
+
+function Menu_noise()
+    Menu_move:setPitch(math.random(5, 15) * .1)
+    Menu_move:play()
 end
 
 -- Reference-able weapons
