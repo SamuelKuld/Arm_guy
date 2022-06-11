@@ -8,8 +8,11 @@ function Menu.new()
     local menu = {}
     setmetatable(menu, Menu)
     menu.selections = {
-        { "fill", love.graphics.getWidth() / 2 - death_image:getWidth() / 2 - 5, (love.graphics.getHeight() / 2 - quit_image:getHeight()) - 172, death_image:getWidth() + 10, death_image:getHeight() + 10 },
-        { "fill", love.graphics.getWidth() / 2 - quit_image:getWidth() / 2 - 5, (love.graphics.getHeight() / 2) + 95, quit_image:getWidth() + 10, quit_image:getHeight() + 10 }
+        { "fill", love.graphics.getWidth() / 2 - death_image:getWidth() / 2 - 5,
+            (love.graphics.getHeight() / 2 - quit_image:getHeight()) - 172, death_image:getWidth() + 10,
+            death_image:getHeight() + 10 },
+        { "fill", love.graphics.getWidth() / 2 - quit_image:getWidth() / 2 - 5, (love.graphics.getHeight() / 2) + 95,
+            quit_image:getWidth() + 10, quit_image:getHeight() + 10 }
     }
     menu.current_selection = 1
     return menu
@@ -25,12 +28,13 @@ function Menu:draw()
     local args = self:Draw_current_selection()
     love.graphics.rectangle(args[1], args[2], args[3], args[4], args[5])
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(death_image, love.graphics.getWidth() / 2 - death_image:getWidth() / 2, (love.graphics.getHeight() / 2 - death_image:getHeight()))
-    love.graphics.draw(quit_image, love.graphics.getWidth() / 2 - death_image:getWidth() / 2, (love.graphics.getHeight() / 2) + 100)
+    love.graphics.draw(death_image, love.graphics.getWidth() / 2 - death_image:getWidth() / 2,
+        (love.graphics.getHeight() / 2 - death_image:getHeight()))
+    love.graphics.draw(quit_image, love.graphics.getWidth() / 2 - death_image:getWidth() / 2,
+        (love.graphics.getHeight() / 2) + 100)
 end
 
 function Menu:load()
-
 end
 
 function Menu:update(dt)

@@ -59,7 +59,6 @@ function Machinegun.new()
     return machinegun
 end
 
-
 Sniper_Rifle = {}
 Sniper_Rifle.__index = Sniper_Rifle
 function Sniper_Rifle.new()
@@ -78,7 +77,6 @@ function Sniper_Rifle.new()
     return sniper_rifle
 end
 
-
 -- Base Values
 Full_screen = false
 love.mouse.setGrabbed(false)
@@ -88,7 +86,7 @@ Player_size = 20
 Player_color = { 1, 1, 1 }
 Movement_increment = 50
 Scroll_multiplier = .01
-Min_enemy_size, Max_enemy_size = 100, 500
+Min_enemy_size, Max_enemy_size = 10, 50
 Min_enemy_speed, Max_enemy_speed = 100, 200
 Min_enemy_health, Max_enemy_health = 5, 10
 Enemy_gun = Shotgun1.new()
@@ -100,10 +98,9 @@ Player_dead = love.audio.newSource("utils/player_death.wav", "static")
 Enemy_dead = love.audio.newSource("utils/enemy_death.wav", "static")
 Menu_move = love.audio.newSource("utils/menu_noise.mp3", "stream")
 Sensitivity = 3
-Game_resolution = {1920, 1080}
+Game_resolution = { 1920, 1080 }
 function Boing()
 end
-
 
 -- Sounds
 function Enemy_death()
@@ -119,7 +116,6 @@ function Player_death()
     Player_dead:setVolume(4)
     Player_dead:play()
 end
-
 
 function Enemy_hurt()
     Enemy_damage:stop()

@@ -1,8 +1,9 @@
 require("enemy")
 Gamera = require("gamera")
-
+love.graphics.setFont(love.graphics.newFont(20))
 Wheel_Value = 0
 Entities = 0
+Hits = 0
 
 function love.wheelmoved(x, y)
     if y < 0 and Wheel_Value > 0 then
@@ -34,13 +35,16 @@ function Bullet.new(x, y, angle, owner)
     self.Bullet_size = self.owner_gun.Bullet_size
     return self
 end
+
 function Bullet:collides(other)
     if self.dead then return false end
-    if math.sqrt((self.x_start - other.x)^2 + (self.y_start - other.y)^2) < other.size then
+    if math.sqrt((self.x_start - other.x) ^ 2 + (self.y_start - other.y) ^ 2) < other.size then
+        Hits = Hits + 1
         return true
     end
     return false
 end
+
 function Bullet:draw()
     love.graphics.setColor(self.Bullet_color)
     love.graphics.line(self.x_start,
@@ -110,6 +114,7 @@ function Bullet:update(dt)
         self.dead = true
     end
 end
+
 Player = {}
 Player.__index = Player
 function Player.new()
@@ -141,7 +146,8 @@ function Player:draw()
     love.graphics.setColor(255, .2, .2, 255)
     love.graphics.rectangle("fill", self.x - self.size, self.y - self.size * 2, self.size * 2, 10)
     love.graphics.setColor(0, 255, 0, 255)
-    love.graphics.rectangle("fill", self.x - self.size, self.y - self.size * 2, self.size * 2 * (self.health / self.initial_health), 10)
+    love.graphics.rectangle("fill", self.x - self.size, self.y - self.size * 2,
+        self.size * 2 * (self.health / self.initial_health), 10)
 
 end
 
@@ -179,7 +185,7 @@ function Game.new()
     game.game_time = 0
     game.gamera = Gamera.new(0, 0, Screen_size[1], Screen_size[2])
     game.gamera:setWindow(0, 0, Game_resolution[1], Game_resolution[2])
-    game.actual_mouse = {x = 0, y = 0}
+    game.actual_mouse = { x = 0, y = 0 }
     love.window.setMode(Game_resolution[1], Game_resolution[2], {})
     game.player = Player.new()
     game.bullets = {}
@@ -331,10 +337,12 @@ function Player:render_bullets()
         self.bullets[i]:draw()
     end
 end
+
 function Player:damage(bullet_damage)
     self.health = self.health - bullet_damage
     Player_hurt()
 end
+
 function Game:render_bullets()
     for i = 1, #self.bullets do
         self.bullets[i]:draw()
@@ -362,7 +370,7 @@ function Game:update(dt)
         self.actual_mouse.y = Screen_size[2]
     end
 
-    love.mouse.setPosition(800 , 800)
+    love.mouse.setPosition(800, 800)
     for i, bullet in ipairs(self.bullets) do
         bullet:update(dt)
         if bullet.dead then
@@ -387,7 +395,7 @@ function Game:update(dt)
         enemy.timer = enemy.timer + dt
     end
 
-    for bullet=1 , #self.player.bullets do
+    for bullet = 1, #self.player.bullets do
         bullet = self.player.bullets[bullet]
         if bullet.owner_type == "player" then
             for enemy = 1, #self.enemies do
@@ -398,7 +406,7 @@ function Game:update(dt)
             end
         end
     end
-    for bullet=1, #self.bullets do
+    for bullet = 1, #self.bullets do
         bullet = self.bullets[bullet]
         if bullet.owner_type == "enemy" then
             if bullet:collides(self.player) then
@@ -416,8 +424,6 @@ function Game:update(dt)
 end
 
 function Render_mouse(x, y)
-    love.graphics.print(x)
-    love.graphics.print(y, 0, 20)
     love.graphics.setColor(1, 0, 0, 1)
     love.graphics.line(x, y + 2, x, y + 10)
     love.graphics.line(x, y - 2, x, y - 10)
@@ -430,11 +436,15 @@ end
 
 function Game:draw_self()
     local function draw()
-        love.graphics.draw(self.background, 0,0,0,  Screen_size[1] / 1000 ,Screen_size[2] /1000)
+        love.graphics.draw(self.background, 0, 0, 0, Screen_size[1] / 1000, Screen_size[2] / 1000)
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.printf(self.score, 0, 0, love.graphics.getWidth(), "right")
+        love.graphics.printf(Hits, 0, 25, love.graphics.getWidth(), "right")
         if self.game_over then
             function Game:update()
 
             end
+
             Current_screen = 3
             love.graphics.setColor(1, 0, 0, 1)
             love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2)
@@ -450,6 +460,7 @@ function Game:draw_self()
         end
         Render_mouse(self.actual_mouse.x, self.actual_mouse.y)
     end
+
     local ini_x_pos, ini_y_pos = self.gamera:getVisibleCorners()
     self.gamera:setPosition(self.player.x, self.player.y)
     local x_pos, y_pos = self.gamera:getVisibleCorners()
